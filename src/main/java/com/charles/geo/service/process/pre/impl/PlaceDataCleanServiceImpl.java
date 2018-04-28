@@ -5,7 +5,6 @@ import com.charles.geo.model.GeoPoint;
 import com.charles.geo.model.Region;
 import com.charles.geo.service.process.pre.IPlaceDataCleanService;
 import com.charles.geo.utils.Constant;
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,8 +47,6 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
         Set<Region> toRemove = new HashSet<Region>();
         for (Region region : regionList) {
             Set<Region> ancestors = allAncestor(region);
-            System.out.println("子区域：" + region);
-            System.out.println("所有父区域：" + ancestors);
             for (Region r : regionList) {
                 boolean f = false;
                 for (Region rg : ancestors) {
@@ -59,7 +56,6 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
                     }
                 }
                 if (f) {
-                    System.out.println("选中的父区域：" + r);
                     mustSave.add(region);
                     if (mustSave.contains(r)) {
                         mustSave.remove(r);
@@ -69,8 +65,6 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
             }
         }
         regionList.removeAll(toRemove);
-        //test
-        System.out.println("mustSave:" + mustSave);
         //找能够转化为经纬度的行政区
         Map<GeoPoint, Region> map = new HashMap<GeoPoint, Region>();
         for (Region region : regionList) {
@@ -79,8 +73,6 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
             if (StringUtils.isBlank(longitude) || StringUtils.isBlank(latitude)) {
                 continue;
             }
-            //test
-            System.out.println(region);
             GeoPoint p = new GeoPoint();
             try {
                 p.setLatitude(Double.parseDouble(latitude));
@@ -91,7 +83,6 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
                 e.printStackTrace();
             }
         }
-        System.out.println("转化行政区划到poi之后：" + geoPointList);
         //对poi点进行canopy聚类
         Map<GeoPoint, Set<GeoPoint>> canopyRes = canopyForPOI(geoPointList);
         //对poi点进行k-means聚类并排除离散的点
