@@ -132,13 +132,13 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
         List<GeoPoint> points = new ArrayList<GeoPoint>();
         points.addAll(points2);
         //获取参数
-        double T1 = getT1ForCanopy(points);
+        double T1 = getT1ForCanopy(points) / 2;
         double T2 = T1 / 2;
         //开始迭代
         Map<GeoPoint, Set<GeoPoint>> cluster = new HashMap<GeoPoint, Set<GeoPoint>>();
         int size = points.size();
         while (size > 0) {
-            int randomIndex = (int) (Math.random() * points.size());
+            int randomIndex = 0;  //(int) (Math.random() * points.size());
             GeoPoint center = points.get(randomIndex);
             points.remove(randomIndex);
             Set<GeoPoint> list = new HashSet<GeoPoint>();
@@ -240,7 +240,7 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
         }
         aveSzie /= core.keySet().size();
         for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
-            if (e.getValue().size() < aveSzie) {
+            if (e.getValue().size() <= 1) {
                 points.removeAll(e.getValue());
             }
         }

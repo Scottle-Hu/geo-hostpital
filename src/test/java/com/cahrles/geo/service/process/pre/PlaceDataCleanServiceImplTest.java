@@ -30,6 +30,8 @@ public class PlaceDataCleanServiceImplTest {
     public void test01() {
         List<GeoPoint> geoPointList = new ArrayList<GeoPoint>();
         geoPointList.add(new GeoPoint(117.3421, 31.2343));
+        geoPointList.add(new GeoPoint(139.3421, 21.2343));
+
         List<Region> regionList = new ArrayList<Region>();
         Region r1 = placeMapper.findRegionById("1000");
         regionList.add(r1);
@@ -41,6 +43,8 @@ public class PlaceDataCleanServiceImplTest {
         regionList.add(r4);
         Region r5 = placeMapper.findRegionById("302");
         regionList.add(r5);
+        Region r6 = placeMapper.findRegionById("1095");
+        regionList.add(r6);
 
         System.out.println("数据预处理之前:");
         System.out.println(regionList);
