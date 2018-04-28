@@ -1,0 +1,32 @@
+[main] INFO org.springframework.test.context.support.DefaultTestContextBootstrapper - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
+[main] INFO org.springframework.test.context.support.DefaultTestContextBootstrapper - Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@8e0379d, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@341b80b2, org.springframework.test.context.support.DependencyInjectionTestExecutionListener@55a1c291, org.springframework.test.context.support.DirtiesContextTestExecutionListener@2145433b, org.springframework.test.context.transaction.TransactionalTestExecutionListener@2890c451, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@40e6dfe1][main] INFO org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [applicationContext.xml]
+[main] INFO org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [druid.xml]
+[main] INFO org.springframework.context.support.GenericApplicationContext - Refreshing org.springframework.context.support.GenericApplicationContext@184cf7cf: startup date [Sat Apr 28 18:43:44 CST 2018]; root of context hierarchy
+[main] INFO org.springframework.context.support.PropertySourcesPlaceholderConfigurer - Loading properties file from class path resource [jdbc.properties]
+[main] INFO org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor - JSR-330 'javax.inject.Inject' annotation found and supported for autowiring
+[main] INFO com.alibaba.druid.pool.DruidDataSource - {dataSource-1} inited
+数据预处理之前:
+[Region{id='1000', name='利州区', aliasList=null, longitude='105.78531723', latitude='32.478529639', fatherId='287', type='区县'}, Region{id='1141', name='巢湖市', aliasList=null, longitude='117.77178338', latitude='31.676058568', fatherId='125', type='区县'}, Region{id='125', name='合肥市', aliasList=null, longitude='', latitude='', fatherId='9', type='市'}, Region{id='1027', name='息烽县', aliasList=null, longitude='106.68198037', latitude='27.150807566', fatherId='302', type='区县'}, Region{id='302', name='贵阳市', aliasList=null, longitude='', latitude='', fatherId='20', type='市'}]
+[GeoPoint{longitude=117.3421, latitude=31.2343}]
+子区域：Region{id='1000', name='利州区', aliasList=null, longitude='105.78531723', latitude='32.478529639', fatherId='287', type='区县'}
+所有父区域：[Region{id='287', name='广元市', aliasList=null, longitude='', latitude='', fatherId='19', type='市'}, Region{id='19', name='四川', aliasList=null, longitude='', latitude='', fatherId='', type='省'}]
+子区域：Region{id='1141', name='巢湖市', aliasList=null, longitude='117.77178338', latitude='31.676058568', fatherId='125', type='区县'}
+所有父区域：[Region{id='9', name='安徽', aliasList=null, longitude='', latitude='', fatherId='', type='省'}, Region{id='125', name='合肥市', aliasList=null, longitude='', latitude='', fatherId='9', type='市'}]
+选中的父区域：Region{id='125', name='合肥市', aliasList=null, longitude='', latitude='', fatherId='9', type='市'}
+子区域：Region{id='125', name='合肥市', aliasList=null, longitude='', latitude='', fatherId='9', type='市'}
+所有父区域：[Region{id='9', name='安徽', aliasList=null, longitude='', latitude='', fatherId='', type='省'}]
+子区域：Region{id='1027', name='息烽县', aliasList=null, longitude='106.68198037', latitude='27.150807566', fatherId='302', type='区县'}
+所有父区域：[Region{id='302', name='贵阳市', aliasList=null, longitude='', latitude='', fatherId='20', type='市'}, Region{id='20', name='贵州', aliasList=null, longitude='', latitude='', fatherId='', type='省'}]
+选中的父区域：Region{id='302', name='贵阳市', aliasList=null, longitude='', latitude='', fatherId='20', type='市'}
+子区域：Region{id='302', name='贵阳市', aliasList=null, longitude='', latitude='', fatherId='20', type='市'}
+所有父区域：[Region{id='20', name='贵州', aliasList=null, longitude='', latitude='', fatherId='', type='省'}]
+mustSave:[Region{id='1141', name='巢湖市', aliasList=null, longitude='117.77178338', latitude='31.676058568', fatherId='125', type='区县'}, Region{id='1027', name='息烽县', aliasList=null, longitude='106.68198037', latitude='27.150807566', fatherId='302', type='区县'}]
+Region{id='1000', name='利州区', aliasList=null, longitude='105.78531723', latitude='32.478529639', fatherId='287', type='区县'}
+Region{id='1141', name='巢湖市', aliasList=null, longitude='117.77178338', latitude='31.676058568', fatherId='125', type='区县'}
+Region{id='1027', name='息烽县', aliasList=null, longitude='106.68198037', latitude='27.150807566', fatherId='302', type='区县'}
+转化行政区划到poi之后：[GeoPoint{longitude=117.3421, latitude=31.2343}, GeoPoint{longitude=105.78531723, latitude=32.478529639}, GeoPoint{longitude=117.77178338, latitude=31.676058568}, GeoPoint{longitude=106.68198037, latitude=27.150807566}]
+canopy聚类结果:{GeoPoint{longitude=106.68198037, latitude=27.150807566}=[GeoPoint{longitude=106.68198037, latitude=27.150807566}, GeoPoint{longitude=105.78531723, latitude=32.478529639}], GeoPoint{longitude=117.3421, latitude=31.2343}=[GeoPoint{longitude=106.68198037, latitude=27.150807566}, GeoPoint{longitude=117.77178338, latitude=31.676058568}, GeoPoint{longitude=117.3421, latitude=31.2343}, GeoPoint{longitude=105.78531723, latitude=32.478529639}]}
+k-means聚类结果:{GeoPoint{longitude=117.55694169, latitude=31.455179284}=[GeoPoint{longitude=117.77178338, latitude=31.676058568}, GeoPoint{longitude=117.3421, latitude=31.2343}], GeoPoint{longitude=106.2336488, latitude=29.8146686025}=[GeoPoint{longitude=106.68198037, latitude=27.150807566}, GeoPoint{longitude=105.78531723, latitude=32.478529639}]}
+数据预处理之后:
+[Region{id='1141', name='巢湖市', aliasList=null, longitude='117.77178338', latitude='31.676058568', fatherId='125', type='区县'}, Region{id='1000', name='利州区', aliasList=null, longitude='105.78531723', latitude='32.478529639', fatherId='287', type='区县'}, Region{id='1027', name='息烽县', aliasList=null, longitude='106.68198037', latitude='27.150807566', fatherId='302', type='区县'}]
+[GeoPoint{longitude=117.3421, latitude=31.2343}]

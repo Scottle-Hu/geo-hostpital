@@ -5,6 +5,7 @@ import com.charles.geo.model.GeoPoint;
 import com.charles.geo.model.Region;
 import com.charles.geo.service.process.pre.IPlaceDataCleanService;
 import com.charles.geo.utils.Constant;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,20 +45,32 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
      */
     public void clean(List<GeoPoint> geoPointList, List<Region> regionList) {
         Set<Region> mustSave = new HashSet<Region>();
+        Set<Region> toRemove = new HashSet<Region>();
         for (Region region : regionList) {
             Set<Region> ancestors = allAncestor(region);
-            Iterator<Region> ite = regionList.iterator();
-            while (ite.hasNext()) {
-                Region r = ite.next();
-                if (ancestors.contains(r)) {
+            System.out.println("子区域：" + region);
+            System.out.println("所有父区域：" + ancestors);
+            for (Region r : regionList) {
+                boolean f = false;
+                for (Region rg : ancestors) {
+                    if (rg.getId().equals(r.getId())) {
+                        f = true;
+                        break;
+                    }
+                }
+                if (f) {
+                    System.out.println("选中的父区域：" + r);
                     mustSave.add(region);
                     if (mustSave.contains(r)) {
                         mustSave.remove(r);
                     }
-                    ite.remove();
+                    toRemove.add(r);
                 }
             }
         }
+        regionList.removeAll(toRemove);
+        //test
+        System.out.println("mustSave:" + mustSave);
         //找能够转化为经纬度的行政区
         Map<GeoPoint, Region> map = new HashMap<GeoPoint, Region>();
         for (Region region : regionList) {
@@ -66,6 +79,8 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
             if (StringUtils.isBlank(longitude) || StringUtils.isBlank(latitude)) {
                 continue;
             }
+            //test
+            System.out.println(region);
             GeoPoint p = new GeoPoint();
             try {
                 p.setLatitude(Double.parseDouble(latitude));
@@ -76,6 +91,7 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
                 e.printStackTrace();
             }
         }
+        System.out.println("转化行政区划到poi之后：" + geoPointList);
         //对poi点进行canopy聚类
         Map<GeoPoint, Set<GeoPoint>> canopyRes = canopyForPOI(geoPointList);
         //对poi点进行k-means聚类并排除离散的点
@@ -118,9 +134,12 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
     /**
      * 对poi点进行canopy聚类
      *
-     * @param points
+     * @param points2
      */
-    public Map<GeoPoint, Set<GeoPoint>> canopyForPOI(List<GeoPoint> points) {
+    public Map<GeoPoint, Set<GeoPoint>> canopyForPOI(List<GeoPoint> points2) {
+        //copy，否则导致bug
+        List<GeoPoint> points = new ArrayList<GeoPoint>();
+        points.addAll(points2);
         //获取参数
         double T1 = getT1ForCanopy(points);
         double T2 = T1 / 2;
@@ -146,6 +165,8 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
             cluster.put(center, list);
             size = points.size();
         }
+        //test
+        System.out.println("canopy聚类结果:" + cluster);
         return cluster;
     }
 
@@ -219,9 +240,16 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
             //更新每个聚类的聚簇中心，记录有没有发生变化
             centerChanged = reCalCenter(core, center);
         }
+        //test
+        System.out.println("k-means聚类结果:" + core);
         //去除离散的点
+        int aveSzie = 0;
         for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
-            if (e.getValue().size() <= 1) {
+            aveSzie += e.getValue().size();
+        }
+        aveSzie /= core.keySet().size();
+        for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
+            if (e.getValue().size() < aveSzie) {
                 points.removeAll(e.getValue());
             }
         }
@@ -288,5 +316,5 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
         }
         return res;
     }
-    
+
 }

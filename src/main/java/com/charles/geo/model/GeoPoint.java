@@ -12,6 +12,15 @@ public class GeoPoint {
 
     private double latitude;
 
+    public GeoPoint(double longitude, double latitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public GeoPoint() {
+        super();
+    }
+
     public double getDist(GeoPoint p) {
         return Math.sqrt(Math.pow(longitude - p.getLongitude(), 2) + Math.pow(latitude - p.getLatitude(), 2));
     }
@@ -30,5 +39,13 @@ public class GeoPoint {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    @Override
+    public String toString() {
+        return "GeoPoint{" +
+                "longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
     }
 }
