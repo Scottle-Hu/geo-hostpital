@@ -3,7 +3,6 @@ package com.charles.geo.service.ner;
 import com.charles.geo.model.Disease;
 import com.charles.geo.model.GeoPoint;
 import com.charles.geo.model.Region;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 import java.util.List;
 
