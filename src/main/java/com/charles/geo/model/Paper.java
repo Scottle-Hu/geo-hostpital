@@ -12,14 +12,14 @@ public class Paper {
 
     private String title;
 
-    private Date publishTime;
+    private String publishTime;
 
     private String author;
 
     /**
-     * 作者机构
+     * 下载次数
      */
-    private String org;
+    private int dnum;
 
     /**
      * 来源
@@ -44,13 +44,6 @@ public class Paper {
         this.title = title;
     }
 
-    public Date getPublishTime() {
-        return publishTime;
-    }
-
-    public void setPublishTime(Date publishTime) {
-        this.publishTime = publishTime;
-    }
 
     public String getAuthor() {
         return author;
@@ -60,12 +53,20 @@ public class Paper {
         this.author = author;
     }
 
-    public String getOrg() {
-        return org;
+    public String getPublishTime() {
+        return publishTime;
     }
 
-    public void setOrg(String org) {
-        this.org = org;
+    public void setPublishTime(String publishTime) {
+        this.publishTime = publishTime;
+    }
+
+    public int getDnum() {
+        return dnum;
+    }
+
+    public void setDnum(int dnum) {
+        this.dnum = dnum;
     }
 
     public String getSource() {
