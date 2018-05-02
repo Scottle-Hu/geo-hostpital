@@ -12,12 +12,11 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 根据大学名称和疾病名称获取论文列表
@@ -41,6 +40,52 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
 
     private String prefix = "http://kns.cnki.net";
 
+    private String SEG = "|";
+
+    /**
+     * 15天清理过期缓存
+     */
+    private long intervalTime = 15 * 24 * 60 * 60 * 1000;
+
+    /**
+     * 存储大学-疾病的论文缓存，存储的key为大学|疾病
+     */
+    private Map<String, List<Paper>> paperCache = new HashMap<String, List<Paper>>();
+
+    /**
+     * 初始化方法定时清理过期缓存
+     */
+    @PostConstruct
+    public void init() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                reload();
+            }
+        }, 0, intervalTime);
+    }
+
+    private void reload() {
+        //TODO 只清理过期缓存即可，需要修改缓存结构
+        paperCache.clear();
+    }
+
+    /**
+     * 这是对抓取论文的一个封装，如果缓存中存在就不抓取，而直接取缓存数据
+     *
+     * @param colleage 大学名称
+     * @param disease  疾病名称
+     * @return 论文对象列表
+     */
+    public List<Paper> getPaper(String colleage, String disease) {
+        String key = colleage + SEG + disease;
+        if (paperCache.get(key) != null) {
+            System.out.println("从缓存中获取论文数据：" + key);
+            return paperCache.get(key);
+        }
+        return catchPaper(colleage, disease);
+    }
+
     /**
      * @param colleage 大学名称
      * @param disease  疾病名称
@@ -63,6 +108,8 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
         //System.out.println(src);
         //解析需要的信息并封装到paperList
         paperList = parseSource(src);
+        //更新缓存
+        paperCache.put(colleage + SEG + disease, paperList);
         return paperList;
     }
 
@@ -237,8 +284,11 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
         return author;
     }
 
+    //测试用例
     public static void main(String[] args) {
         PaperCatchServiceImpl instance = new PaperCatchServiceImpl();
-        instance.catchPaper("武汉大学", "白血病");
+        instance.getPaper("武汉大学", "白血病");
+        //测试缓存
+        instance.getPaper("武汉大学", "白血病");
     }
 }

@@ -13,12 +13,21 @@ import java.util.List;
 public interface IPaperCatchService {
 
     /**
-     * 根据大学名称和疾病名称获取论文列表
+     * 根据大学名称和疾病名称抓取论文列表
      *
      * @param colleage
      * @param disease
      * @return
      */
     List<Paper> catchPaper(String colleage, String disease);
+
+    /**
+     * 根据大学名称和疾病名称从缓存中获取或者抓取论文列表
+     *
+     * @param colleage
+     * @param disease
+     * @return
+     */
+    List<Paper> getPaper(String colleage, String disease);
 
 }
