@@ -23,7 +23,7 @@ public class PlaceMapperTest {
     public void test01() {
         Region res = placeMapper.findRegionById("123abc");
         System.out.println(res);
-        res = placeMapper.findRegionById("1000");
+        res = placeMapper.findRegionById("1");
         System.out.println(res);
     }
 

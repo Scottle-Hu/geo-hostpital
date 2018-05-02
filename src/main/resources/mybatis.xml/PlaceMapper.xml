@@ -35,5 +35,9 @@
         SELECT * FROM t_place WHERE id=#{_param} AND (`type` IS NULL  OR `type`='')
     </select>
 
+    <!--根据father_id查询-->
+    <select id="findRegionByFather" resultMap="RegionMap" parameterType="String">
+        SELECT * FROM t_place WHERE father_id=#{_param} AND `type` IS NOT NULL  AND `type`!=''
+    </select>
 
 </mapper>

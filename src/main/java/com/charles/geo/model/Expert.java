@@ -59,7 +59,7 @@ public class Expert {
     }
 
     public void setMajor(String major) {
-        this.major = major;
+        this.major = major.trim();
     }
 
     public String getLevel() {
@@ -76,5 +76,18 @@ public class Expert {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public String toString() {
+        return "Expert{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", photo='" + photo + '\'' +
+                ", department='" + department + '\'' +
+                ", major='" + major + '\'' +
+                ", level='" + level + '\'' +
+                ", url='" + url + '\'' +
+                '}';
     }
 }

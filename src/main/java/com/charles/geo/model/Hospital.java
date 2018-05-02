@@ -16,9 +16,9 @@ public class Hospital {
 
     private String alias;
 
-    private String longitude;
+    private double longitude;
 
-    private String latitude;
+    private double latitude;
 
     private String quality;
 
@@ -63,19 +63,19 @@ public class Hospital {
         this.alias = alias;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
@@ -84,7 +84,7 @@ public class Hospital {
     }
 
     public void setQuality(String quality) {
-        this.quality = quality;
+        this.quality = quality.trim();
     }
 
     public String getLevel() {
@@ -116,7 +116,7 @@ public class Hospital {
     }
 
     public void setIntroduction(String introduction) {
-        this.introduction = introduction;
+        this.introduction = introduction.trim();
     }
 
     public String getTransport() {
@@ -124,7 +124,7 @@ public class Hospital {
     }
 
     public void setTransport(String transport) {
-        this.transport = transport;
+        this.transport = transport.trim();
     }
 
     public String getUrl() {
@@ -141,5 +141,24 @@ public class Hospital {
 
     public void setExpertList(List<Expert> expertList) {
         this.expertList = expertList;
+    }
+
+    @Override
+    public String toString() {
+        return "Hospital{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", alias='" + alias + '\'' +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", quality='" + quality + '\'' +
+                ", level='" + level + '\'' +
+                ", address='" + address + '\'' +
+                ", place='" + place + '\'' +
+                ", introduction='" + introduction + '\'' +
+                ", transport='" + transport + '\'' +
+                ", url='" + url + '\'' +
+                ", expertList=" + expertList +
+                '}';
     }
 }

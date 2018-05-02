@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charles.geo.mapper.HospitalMapper">
+
+    <!-- 定义Hospital类型 -->
+    <resultMap type="Hospital" id="HospitalMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="quality" column="quality"/>
+        <result property="level" column="level"/>
+        <result property="address" column="address"/>
+        <result property="place" column="place"/>
+        <result property="introduction" column="introduction"/>
+        <result property="transport" column="transport"/>
+        <result property="url" column="url"/>
+        <collection property="expertList" column="id"
+                    select="com.charles.geo.mapper.ExpertMapper.findByHospitalId"/>
+    </resultMap>
+
+
+    <!--根据经纬度范围查询医院-->
+    <select id="queryByRange" resultMap="HospitalMap" parameterType="Map">
+        SELECT * FROM t_hospital WHERE  <![CDATA[ longitude> ]]>#{longitudeMin} AND <![CDATA[ longitude< ]]>#{longitudeMax}
+        AND <![CDATA[ latitude> ]]>#{latitudeMin} AND <![CDATA[ latitude< ]]>#{latitudeMax}
+    </select>
+
+    <!--根据行政区查询医院-->
+    <select id="queryByRegion" resultMap="HospitalMap" parameterType="String">
+        SELECT * FROM t_hospital WHERE place LIKE #{_param}
+    </select>
+
+</mapper>

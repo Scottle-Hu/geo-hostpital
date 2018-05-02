@@ -85,7 +85,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             //构造查询条件
             if (region.getType().equals(Constant.COUNTY)) {  //区县级别
                 Region father = placeMapper.findRegionById(region.getFatherId());
-                q = father.getName() + " " + region.getName();
+                q = "%" + father.getName() + " " + region.getName() + "%";
                 hospitalSet.addAll(hospitalMapper.queryByRegion(q));
             } else if (region.getType().equals(Constant.CITY)) {  //市级别
                 q = region.getName() + "%"; //模糊匹配
