@@ -1,6 +1,7 @@
 package com.charles.geo.model;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 大学类
@@ -19,9 +20,9 @@ public class Colleage {
     private String latitude;
 
     /**
-     * 论文集合
+     * 论文集合(每个map的键为疾病名称)
      */
-    private List<Paper> paperList;
+    private Map<String, List<Paper>> paperList;
 
     public String getName() {
         return name;
@@ -55,11 +56,11 @@ public class Colleage {
         this.latitude = latitude;
     }
 
-    public List<Paper> getPaperList() {
+    public Map<String, List<Paper>> getPaperList() {
         return paperList;
     }
 
-    public void setPaperList(List<Paper> paperList) {
+    public void setPaperList(Map<String, List<Paper>> paperList) {
         this.paperList = paperList;
     }
 }

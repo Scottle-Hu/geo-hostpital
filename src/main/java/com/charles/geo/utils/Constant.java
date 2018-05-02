@@ -9,4 +9,10 @@ package com.charles.geo.utils;
 public class Constant {
 
     public static double DOUBLE_ZERO = 10e-6;
+
+    public static String COUNTY = "区县";
+
+    public static String CITY = "市";
+
+    public static String PROVINCE = "省";
 }

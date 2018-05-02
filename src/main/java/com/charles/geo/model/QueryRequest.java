@@ -14,7 +14,7 @@ public class QueryRequest {
 
     private List<Region> regionList;
 
-    private List<PointPlace> pointPlaceList;
+    private List<Disease> diseaseList;
 
     /**
      * 查询者所处经纬度
@@ -42,12 +42,12 @@ public class QueryRequest {
         this.regionList = regionList;
     }
 
-    public List<PointPlace> getPointPlaceList() {
-        return pointPlaceList;
+    public List<Disease> getDiseaseList() {
+        return diseaseList;
     }
 
-    public void setPointPlaceList(List<PointPlace> pointPlaceList) {
-        this.pointPlaceList = pointPlaceList;
+    public void setDiseaseList(List<Disease> diseaseList) {
+        this.diseaseList = diseaseList;
     }
 
     public GeoPoint getCurrentPoint() {
