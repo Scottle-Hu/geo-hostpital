@@ -7,9 +7,7 @@ import com.charles.geo.model.*;
 import com.charles.geo.service.process.IMainQueryService;
 import com.charles.geo.service.rank.IPaperCatchService;
 import com.charles.geo.service.rank.IRankService;
-import com.charles.geo.service.rank.impl.PaperCatchServiceImpl;
 import com.charles.geo.utils.Constant;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +51,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 按照经纬度查询的时候取附近的经纬度范围
      */
-    private double geoRank = 0.036;
+    private double geoRank = 0.036;  //4KM
 
     @Autowired
     private IRankService rankService;

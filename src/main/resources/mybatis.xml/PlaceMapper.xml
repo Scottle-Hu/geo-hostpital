@@ -25,9 +25,13 @@
         <result property="fatherId" column="father_id"/>
     </resultMap>
 
+    <resultMap id="StringResult" type="java.lang.String">
+        <result column="place_id" property="placeId" jdbcType="VARCHAR"/>
+    </resultMap>
+
     <!--根据id查询行政区划-->
     <select id="findRegionById" resultMap="RegionMap" parameterType="java.lang.String">
-      SELECT * FROM t_place WHERE id=#{_param} AND `type` IS NOT NULL  AND `type`!=''
+      SELECT * FROM t_region WHERE id=#{_param}
     </select>
 
     <!--根据id查询poi地点-->
@@ -35,9 +39,24 @@
         SELECT * FROM t_place WHERE id=#{_param} AND (`type` IS NULL  OR `type`='')
     </select>
 
+    <!--查询所有行政区划-->
+    <select id="findAllRegion" resultMap="RegionMap">
+        SELECT * FROM t_region
+    </select>
+
+    <!--插入行政区划的别名-->
+    <insert id="insertAlias" parameterType="Map">
+        INSERT INTO t_alias VALUES (#{id},#{alias},#{type},#{place_id})
+    </insert>
+
     <!--根据father_id查询-->
     <select id="findRegionByFather" resultMap="RegionMap" parameterType="String">
-        SELECT * FROM t_place WHERE father_id=#{_param} AND `type` IS NOT NULL  AND `type`!=''
+        SELECT * FROM t_region WHERE father_id=#{_param}
+    </select>
+
+    <!--findPlaceIdByAlias-->
+    <select id="findPlaceIdByAlias" resultMap="StringResult" parameterType="String">
+        SELECT place_id FROM t_alias WHERE alias LIKE #{_param}
     </select>
 
 </mapper>

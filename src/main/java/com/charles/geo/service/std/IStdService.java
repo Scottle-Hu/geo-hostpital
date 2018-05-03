@@ -53,5 +53,5 @@ public interface IStdService {
      * @param name
      * @return
      */
-    List<Hospital> convertPeople2Hospital(String name);
+    List<GeoPoint> convertPeople2Hospital(String name);
 }

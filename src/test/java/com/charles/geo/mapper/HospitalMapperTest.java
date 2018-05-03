@@ -35,9 +35,9 @@ public class HospitalMapperTest {
         System.out.println();
         Map<String, Double> map = new HashMap<String, Double>();
         map.put("longitudeMin", 117.32);
-        map.put("longitudeMax", 117.36);
+        map.put("longitudeMax", 117.56);
         map.put("latitudeMin", 30.32);
-        map.put("latitudeMax", 30.36);
+        map.put("latitudeMax", 31.36);
         hospitals = hospitalMapper.queryByRange(map);
         for (Hospital h : hospitals) {
             System.out.println(h);

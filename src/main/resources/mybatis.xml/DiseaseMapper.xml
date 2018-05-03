@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charles.geo.mapper.DiseaseMapper">
+
+    <!-- 定义Expert类型 -->
+    <resultMap type="Disease" id="DiseaseMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="depart" column="depart"/>
+    </resultMap>
+
+
+    <!--通过疾病名称查找-->
+    <select id="findByName" parameterType="String" resultMap="DiseaseMap">
+        SELECT * FROM t_disease WHERE disease=#{_param}
+    </select>
+
+    <!--通过科室名称查找-->
+    <select id="findByDepart" parameterType="String" resultMap="DiseaseMap">
+        SELECT * FROM t_disease WHERE depart=#{_param}
+    </select>
+
+</mapper>

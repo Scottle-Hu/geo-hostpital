@@ -27,4 +27,12 @@ public interface HospitalMapper {
      */
     List<Hospital> queryByRegion(String region);
 
+    /**
+     * 根据专家名称连接查询，获取医院集合
+     *
+     * @param expert
+     * @return
+     */
+    List<Hospital> queryByExpert(String expert);
+
 }

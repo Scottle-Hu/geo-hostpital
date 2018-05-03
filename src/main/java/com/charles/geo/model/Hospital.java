@@ -1,5 +1,7 @@
 package com.charles.geo.model;
 
+import com.charles.geo.utils.StringUtil;
+
 import java.util.List;
 
 /**
@@ -52,7 +54,7 @@ public class Hospital {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = StringUtil.clearStringFromWeb(name);
     }
 
     public String getAlias() {
@@ -60,7 +62,7 @@ public class Hospital {
     }
 
     public void setAlias(String alias) {
-        this.alias = alias;
+        this.alias = StringUtil.clearStringFromWeb(alias);
     }
 
     public double getLongitude() {
@@ -84,7 +86,7 @@ public class Hospital {
     }
 
     public void setQuality(String quality) {
-        this.quality = quality.trim();
+        this.quality = StringUtil.clearStringFromWeb(quality);
     }
 
     public String getLevel() {
@@ -92,7 +94,7 @@ public class Hospital {
     }
 
     public void setLevel(String level) {
-        this.level = level;
+        this.level = StringUtil.clearStringFromWeb(level);
     }
 
     public String getAddress() {
@@ -116,7 +118,7 @@ public class Hospital {
     }
 
     public void setIntroduction(String introduction) {
-        this.introduction = introduction.trim();
+        this.introduction = StringUtil.clearStringFromWeb(introduction);
     }
 
     public String getTransport() {
@@ -124,7 +126,7 @@ public class Hospital {
     }
 
     public void setTransport(String transport) {
-        this.transport = transport.trim();
+        this.transport = StringUtil.clearStringFromWeb(transport);
     }
 
     public String getUrl() {
@@ -160,5 +162,10 @@ public class Hospital {
                 ", url='" + url + '\'' +
                 ", expertList=" + expertList +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Hospital && ((Hospital) obj).getId().equals(id);
     }
 }

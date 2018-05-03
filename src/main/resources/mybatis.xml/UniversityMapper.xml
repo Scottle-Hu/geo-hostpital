@@ -15,13 +15,13 @@
 
 
     <!--根据经纬度范围查询大学-->
-    <select id="queryByRange" resultMap="HospitalMap" parameterType="Map">
+    <select id="queryByRange" resultMap="ColleageMap" parameterType="Map">
         SELECT * FROM t_university WHERE  <![CDATA[ longitude> ]]>#{longitudeMin} AND <![CDATA[ longitude< ]]>#{longitudeMax}
         AND <![CDATA[ latitude> ]]>#{latitudeMin} AND <![CDATA[ latitude< ]]>#{latitudeMax}
     </select>
 
     <!--根据行政区father_id查询大学-->
-    <select id="queryByRegion" resultMap="HospitalMap" parameterType="String">
+    <select id="queryByRegion" resultMap="ColleageMap" parameterType="String">
         SELECT * FROM t_university WHERE father_id = #{_param}
     </select>
 

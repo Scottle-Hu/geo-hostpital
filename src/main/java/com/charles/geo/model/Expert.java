@@ -1,5 +1,7 @@
 package com.charles.geo.model;
 
+import com.charles.geo.utils.StringUtil;
+
 /**
  * 专家信息
  *
@@ -59,7 +61,7 @@ public class Expert {
     }
 
     public void setMajor(String major) {
-        this.major = major.trim();
+        this.major = StringUtil.clearStringFromWeb(major);
     }
 
     public String getLevel() {
@@ -67,7 +69,7 @@ public class Expert {
     }
 
     public void setLevel(String level) {
-        this.level = level;
+        this.level = StringUtil.clearStringFromWeb(level);
     }
 
     public String getUrl() {

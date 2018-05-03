@@ -73,4 +73,16 @@ public class Colleage {
     public void setPaperList(Map<String, List<Paper>> paperList) {
         this.paperList = paperList;
     }
+
+    @Override
+    public String toString() {
+        return "Colleage{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", paperList=" + paperList +
+                '}';
+    }
 }

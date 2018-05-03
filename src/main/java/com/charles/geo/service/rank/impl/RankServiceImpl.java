@@ -16,10 +16,10 @@ import java.util.List;
 public class RankServiceImpl implements IRankService {
     
     public List<Hospital> rankHospital(List<Hospital> hospitals, QueryRequest request) {
-        return null;
+        return hospitals;
     }
 
     public List<Colleage> rankColleage(List<Colleage> colleages, QueryRequest request) {
-        return null;
+        return colleages;
     }
 }

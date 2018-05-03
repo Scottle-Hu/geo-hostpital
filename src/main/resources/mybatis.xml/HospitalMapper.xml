@@ -34,4 +34,12 @@
         SELECT * FROM t_hospital WHERE place LIKE #{_param}
     </select>
 
+    <!--根据专家名称查询医院集合-->
+    <select id="queryByExpert" parameterType="String" resultMap="HospitalMap">
+        SELECT h.id AS id,h.name AS  `name`,h.longitude AS longitude,h.latitude AS latitude,
+        h.quality AS quality,h.level AS  `level`,h.address AS address,h.place AS place,
+        h.introduction AS introduction,h.transport AS transport,h.url AS url
+        FROM t_hospital h,t_expert e WHERE h.id=e.hospital_id AND e.name=#{_param}
+    </select>
+
 </mapper>
