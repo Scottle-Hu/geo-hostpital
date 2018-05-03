@@ -34,9 +34,19 @@ public class MainQueryServiceImpl implements IMainQueryService {
     private final int HOS_MAX_RECOMMAND_NUM = 10;
 
     /**
+     * 医疗机构最小推荐数目
+     */
+    private final int HOS_MIN_RECOMMAND_NUM = 3;
+
+    /**
      * 学校最大推荐数目
      */
     private final int COLLE_MAX_RECOMMAND_NUM = 10;
+
+    /**
+     * 学校最小推荐数目
+     */
+    private final int COLLE_MIN_RECOMMAND_NUM = 10;
 
     /**
      * 按照经纬度查询的时候取附近的经纬度范围
@@ -114,8 +124,46 @@ public class MainQueryServiceImpl implements IMainQueryService {
             map.put("latitudeMax", latitudeMax);
             hospitalSet.addAll(hospitalMapper.queryByRange(map));
         }
+        int level = 1;
+        //如果医院候选列表过少，将行政区划向上扩张
+        while (hospitalSet.size() < HOS_MIN_RECOMMAND_NUM) {
+            if (level > 2) {
+                LOGGER.error("所提名的推荐医院候选列表元素个数太少,可能是数据原因。");
+                break;
+            }
+            switch (level) {
+                case 1: {  //扩充区县级别到市
+                    for (Region region : regionList) {
+                        if (region.getType().equals(Constant.COUNTY)) {
+                            Region f = placeMapper.findRegionById(region.getFatherId());
+                            String q = f.getName() + "%";
+                            hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                        }
+                    }
+                    break;
+                }
+                case 2: {  //扩充市级别到省【或许没有必要】
+                    for (Region region : regionList) {
+                        if (region.getType().equals(Constant.CITY)) {
+                            Region f = placeMapper.findRegionById(region.getFatherId());
+                            List<Region> sons = placeMapper.findRegionByFather(f.getId());
+                            for (Region s : sons) {
+                                String q = s.getName() + "%";
+                                hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            level++;
+        }
         //根据疾病名称排序筛选
+        hospitalList.addAll(hospitalSet);
         hospitalList = rankService.rankHospital(hospitalList, request);
+        if (hospitalList.size() > HOS_MAX_RECOMMAND_NUM) {  //多于最多推荐个数，筛选前N个
+            hospitalList = hospitalList.subList(0, HOS_MAX_RECOMMAND_NUM);
+        }
         return hospitalList;
     }
 
