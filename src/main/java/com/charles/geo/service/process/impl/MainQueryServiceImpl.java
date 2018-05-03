@@ -2,8 +2,10 @@ package com.charles.geo.service.process.impl;
 
 import com.charles.geo.mapper.HospitalMapper;
 import com.charles.geo.mapper.PlaceMapper;
+import com.charles.geo.mapper.UniversityMapper;
 import com.charles.geo.model.*;
 import com.charles.geo.service.process.IMainQueryService;
+import com.charles.geo.service.rank.IPaperCatchService;
 import com.charles.geo.service.rank.IRankService;
 import com.charles.geo.service.rank.impl.PaperCatchServiceImpl;
 import com.charles.geo.utils.Constant;
@@ -36,17 +38,17 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 医疗机构最小推荐数目
      */
-    private final int HOS_MIN_RECOMMAND_NUM = 3;
+    private final int HOS_MIN_RECOMMAND_NUM = 2;
 
     /**
      * 学校最大推荐数目
      */
-    private final int COLLE_MAX_RECOMMAND_NUM = 10;
+    private final int COLLE_MAX_RECOMMAND_NUM = 9;
 
     /**
      * 学校最小推荐数目
      */
-    private final int COLLE_MIN_RECOMMAND_NUM = 10;
+    private final int COLLE_MIN_RECOMMAND_NUM = 1;
 
     /**
      * 按照经纬度查询的时候取附近的经纬度范围
@@ -62,12 +64,18 @@ public class MainQueryServiceImpl implements IMainQueryService {
     @Autowired
     private PlaceMapper placeMapper;
 
+    @Autowired
+    private UniversityMapper universityMapper;
+
+    @Autowired
+    private IPaperCatchService paperCatchService;
+
     /**
      * @param request
      * @return
      */
-    public InfomationResponse handler(QueryRequest request) {
-        InfomationResponse response = new InfomationResponse();
+    public InformationResponse handler(QueryRequest request) {
+        InformationResponse response = new InformationResponse();
         //获取推荐的医疗机构
         List<Hospital> hospitals = getHospitals(request);
         //获取推荐的大学及研究信息
@@ -113,15 +121,11 @@ public class MainQueryServiceImpl implements IMainQueryService {
             double longitude = point.getLongitude();
             double latitude = point.getLatitude();
             //计算选择医院的经纬度范围
-            double longitudeMin = longitude - geoRank;
-            double longitudeMax = longitude + geoRank;
-            double latitudeMin = latitude - geoRank;
-            double latitudeMax = latitude + geoRank;
             Map<String, Double> map = new HashMap<String, Double>();
-            map.put("longitudeMin", longitudeMin);
-            map.put("longitudeMax", longitudeMax);
-            map.put("latitudeMin", latitudeMin);
-            map.put("latitudeMax", latitudeMax);
+            map.put("longitudeMin", longitude - geoRank);
+            map.put("longitudeMax", longitude + geoRank);
+            map.put("latitudeMin", latitude - geoRank);
+            map.put("latitudeMax", latitude + geoRank);
             hospitalSet.addAll(hospitalMapper.queryByRange(map));
         }
         int level = 1;
@@ -175,7 +179,56 @@ public class MainQueryServiceImpl implements IMainQueryService {
      */
     private List<Colleage> getColleages(QueryRequest request) {
         List<Colleage> colleageList = new ArrayList<Colleage>();
-
+        Set<Colleage> colleageSet = new HashSet<Colleage>();
+        List<Region> regionList = request.getRegionList();  //行政区划集合
+        List<GeoPoint> pointList = request.getPointList();  //经纬度点集合
+        List<Disease> diseaseList = request.getDiseaseList();
+        //获取行政区划下面的所有大学
+        for (Region region : regionList) {
+            if (region.getType().equals(Constant.COUNTY)) {
+                colleageSet.addAll(universityMapper.queryByRegion(region.getId()));
+            } else if (region.getType().equals(Constant.CITY)) {
+                List<Region> sons = placeMapper.findRegionByFather(region.getId());
+                for (Region r : sons) {
+                    colleageSet.addAll(universityMapper.queryByRegion(r.getId()));
+                }
+            } else {
+                List<Region> sons = placeMapper.findRegionByFather(region.getId());
+                for (Region r : sons) {
+                    List<Region> sonList = placeMapper.findRegionByFather(r.getId());
+                    for (Region s : sonList) {
+                        colleageSet.addAll(universityMapper.queryByRegion(s.getId()));
+                    }
+                }
+            }
+        }
+        //获取每个经纬度节点附近的大学，取并集
+        for (GeoPoint point : pointList) {
+            double longitude = point.getLongitude();
+            double latitude = point.getLatitude();
+            //确定选择大学的经纬度范围
+            Map<String, Double> map = new HashMap<String, Double>();
+            map.put("longitudeMin", longitude - geoRank);
+            map.put("longitudeMax", longitude + geoRank);
+            map.put("latitudeMin", latitude - geoRank);
+            map.put("latitudeMax", latitude + geoRank);
+            colleageSet.addAll(universityMapper.queryByRange(map));
+        }
+        //填充大学的论文集用于排序
+        for (Colleage colleage : colleageSet) {
+            Map<String, List<Paper>> paperMap = new HashMap<String, List<Paper>>();
+            for (Disease d : diseaseList) {
+                List<Paper> paper = paperCatchService.getPaper(colleage.getName(), d.getName());
+                paperMap.put(d.getName(), paper);
+            }
+            colleage.setPaperList(paperMap);
+        }
+        //排序筛选
+        colleageList.addAll(colleageSet);
+        colleageList = rankService.rankColleage(colleageList, request);
+        if (colleageList.size() > COLLE_MAX_RECOMMAND_NUM) {
+            colleageList = colleageList.subList(0, COLLE_MAX_RECOMMAND_NUM);
+        }
         return colleageList;
     }
 }

@@ -1,6 +1,6 @@
 package com.charles.geo.service.process;
 
-import com.charles.geo.model.InfomationResponse;
+import com.charles.geo.model.InformationResponse;
 import com.charles.geo.model.QueryRequest;
 
 /**
@@ -17,6 +17,6 @@ public interface IMainQueryService {
      * @param request
      * @return
      */
-    InfomationResponse handler(QueryRequest request);
+    InformationResponse handler(QueryRequest request);
 
 }

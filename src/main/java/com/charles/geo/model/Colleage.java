@@ -11,6 +11,8 @@ import java.util.Map;
  */
 public class Colleage {
 
+    private String id;
+
     private String name;
 
     private String address;
@@ -23,6 +25,14 @@ public class Colleage {
      * 论文集合(每个map的键为疾病名称)
      */
     private Map<String, List<Paper>> paperList;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

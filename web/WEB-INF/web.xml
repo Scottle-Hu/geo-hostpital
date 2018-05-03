@@ -52,6 +52,6 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>springMVC</servlet-name>
-        <url-pattern>*.do</url-pattern>
+        <url-pattern>*.geo</url-pattern>
     </servlet-mapping>
 </web-app>

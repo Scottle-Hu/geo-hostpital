@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charles.geo.mapper.UniversityMapper">
+
+    <!-- 定义Colleage类型 -->
+    <resultMap type="Colleage" id="ColleageMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+    </resultMap>
+
+
+    <!--根据经纬度范围查询大学-->
+    <select id="queryByRange" resultMap="HospitalMap" parameterType="Map">
+        SELECT * FROM t_university WHERE  <![CDATA[ longitude> ]]>#{longitudeMin} AND <![CDATA[ longitude< ]]>#{longitudeMax}
+        AND <![CDATA[ latitude> ]]>#{latitudeMin} AND <![CDATA[ latitude< ]]>#{latitudeMax}
+    </select>
+
+    <!--根据行政区father_id查询大学-->
+    <select id="queryByRegion" resultMap="HospitalMap" parameterType="String">
+        SELECT * FROM t_university WHERE father_id = #{_param}
+    </select>
+
+</mapper>

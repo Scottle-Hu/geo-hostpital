@@ -8,7 +8,7 @@ import java.util.List;
  * @author Cahrles
  * @since 1.0
  */
-public class InfomationResponse {
+public class InformationResponse {
 
     /**
      * 推荐医院

@@ -10,6 +10,10 @@ import java.util.List;
  */
 public class Disease {
 
+    private String id;
+
+    private String depart;
+
     private String name;
 
     private List<String> medicalList;
@@ -28,5 +32,21 @@ public class Disease {
 
     public void setMedicalList(List<String> medicalList) {
         this.medicalList = medicalList;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDepart() {
+        return depart;
+    }
+
+    public void setDepart(String depart) {
+        this.depart = depart;
     }
 }
