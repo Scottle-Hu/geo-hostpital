@@ -41,4 +41,18 @@ public class UniversityMapperTest {
         }
     }
 
+    @Test
+    public void test02() {
+        Colleage colleage = universityMapper.queryByName("武汉大学");
+        System.out.println(colleage);
+    }
+
+    @Test
+    public void test03() {
+        List<Colleage> colleageList = universityMapper.queryByAliases("南大");
+        for (Colleage c : colleageList) {
+            System.out.println(c);
+        }
+    }
+
 }

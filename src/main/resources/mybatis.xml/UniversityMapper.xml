@@ -25,4 +25,15 @@
         SELECT * FROM t_university WHERE father_id = #{_param}
     </select>
 
+    <!--根据全称查询-->
+    <select id="queryByName" parameterType="String" resultType="Colleage">
+        SELECT * FROM t_university WHERE `name`=#{_param}
+    </select>
+
+    <!--根据简称查询-->
+    <select id="queryByAliases" parameterType="String" resultMap="ColleageMap">
+      SELECT u.id as id,u.name as `name`,u.longitude as longitude,u.latitude as latitude
+      FROM t_university u,t_alias2 as a WHERE u.id = a.university_id AND a.alias=#{_param}
+    </select>
+
 </mapper>

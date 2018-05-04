@@ -11,7 +11,7 @@ import java.util.Map;
  * @since 1.0
  */
 public interface UniversityMapper {
-    
+
     /**
      * 根据经纬度范围查询大学
      *
@@ -27,4 +27,14 @@ public interface UniversityMapper {
      * @return
      */
     List<Colleage> queryByRegion(String region);
+
+    /**
+     * 根据全称查询
+     */
+    Colleage queryByName(String name);
+
+    /**
+     * 根据简称查询
+     */
+    List<Colleage> queryByAliases(String alias);
 }

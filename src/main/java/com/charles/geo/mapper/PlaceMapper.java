@@ -29,4 +29,11 @@ public interface PlaceMapper {
 
     PointPlace findPointPlaceById(String id);
 
+    /**
+     * 根据地点名称查询地点列表
+     *
+     * @param name
+     * @return
+     */
+    List<PointPlace> queryPointPlaceByName(String name);
 }

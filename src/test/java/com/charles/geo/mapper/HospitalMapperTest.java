@@ -43,4 +43,20 @@ public class HospitalMapperTest {
             System.out.println(h);
         }
     }
+
+    @Test
+    public void test02() {
+        List<Hospital> hospitals = hospitalMapper.queryByName("武汉大学中南医院");
+        for (Hospital h : hospitals) {
+            System.out.println(h);
+        }
+    }
+
+    @Test
+    public void test03() {
+        List<Hospital> hospitals = hospitalMapper.queryByAlias("协和医院");
+        for (Hospital h : hospitals) {
+            System.out.println(h);
+        }
+    }
 }

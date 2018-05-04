@@ -59,4 +59,9 @@
         SELECT place_id FROM t_alias WHERE alias LIKE #{_param}
     </select>
 
+    <!--queryPointPlaceByName-->
+    <select id="queryPointPlaceByName" parameterType="String" resultMap="PointPlaceMap">
+        SELECT * FROM t_place WHERE (`type` is null OR `type`='') AND `name` LIKE #{_param}
+    </select>
+
 </mapper>

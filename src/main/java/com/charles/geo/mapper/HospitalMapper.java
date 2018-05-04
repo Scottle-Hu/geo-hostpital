@@ -35,4 +35,20 @@ public interface HospitalMapper {
      */
     List<Hospital> queryByExpert(String expert);
 
+    /**
+     * 根据医院名称查询
+     *
+     * @param name
+     * @return
+     */
+    List<Hospital> queryByName(String name);
+
+    /**
+     * 根据医院别名查询
+     *
+     * @param name
+     * @return
+     */
+    List<Hospital> queryByAlias(String name);
+
 }

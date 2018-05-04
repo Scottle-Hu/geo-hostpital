@@ -42,4 +42,14 @@
         FROM t_hospital h,t_expert e WHERE h.id=e.hospital_id AND e.name=#{_param}
     </select>
 
+    <!--根据医院名称查询-->
+    <select id="queryByName" parameterType="String" resultMap="HospitalMap">
+        SELECT * FROM t_hospital WHERE `name` LIKE #{_param}
+    </select>
+
+    <!--根据医院别名查询-->
+    <select id="queryByAlias" parameterType="String" resultMap="HospitalMap">
+        SELECT * FROM t_hospital WHERE `alias` LIKE #{_param}
+    </select>
+
 </mapper>

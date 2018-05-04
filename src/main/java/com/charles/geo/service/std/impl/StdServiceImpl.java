@@ -3,10 +3,8 @@ package com.charles.geo.service.std.impl;
 import com.charles.geo.mapper.DiseaseMapper;
 import com.charles.geo.mapper.HospitalMapper;
 import com.charles.geo.mapper.PlaceMapper;
-import com.charles.geo.model.Disease;
-import com.charles.geo.model.GeoPoint;
-import com.charles.geo.model.Hospital;
-import com.charles.geo.model.Region;
+import com.charles.geo.mapper.UniversityMapper;
+import com.charles.geo.model.*;
 import com.charles.geo.service.std.IStdService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,9 @@ public class StdServiceImpl implements IStdService {
     @Autowired
     private PlaceMapper placeMapper;
 
+    @Autowired
+    private UniversityMapper universityMapper;
+
     public GeoPoint convertPOI2Point(String place) {
         return null;
     }
@@ -67,14 +68,80 @@ public class StdServiceImpl implements IStdService {
         for (String id : regionIds) {
             regionList.add(placeMapper.findRegionById(id));
         }
-
         /*
         地点转化为经纬度的优先级：
         先查大学、医院，只因为这两张表比较快
         然后分别精确和模糊查询t_place表【耗时】
         最后调用api查询【最耗时，且不确定性较大】
          */
-        
+        for (String name : pointNames) {
+            //尝试查询大学标准名称
+            Colleage colleage = universityMapper.queryByName(name);
+            if (colleage != null) {
+                GeoPoint geoPoint = new GeoPoint();
+                geoPoint.setLongitude(Double.parseDouble(colleage.getLongitude()));
+                geoPoint.setLatitude(Double.parseDouble(colleage.getLatitude()));
+                pointList.add(geoPoint);
+                continue;
+            }
+            //尝试查询大学简称
+            List<Colleage> colleageList = universityMapper.queryByAliases(name);
+            if (colleageList != null && colleageList.size() > 0) {
+                for (Colleage c : colleageList) {
+                    GeoPoint geoPoint = new GeoPoint();
+                    geoPoint.setLongitude(Double.parseDouble(c.getLongitude()));
+                    geoPoint.setLatitude(Double.parseDouble(c.getLatitude()));
+                    pointList.add(geoPoint);
+                }
+                continue;
+            }
+            //尝试查询医院名称
+            List<Hospital> hospitals = hospitalMapper.queryByName(name);
+            if (hospitals != null && hospitals.size() > 0) {
+                for (Hospital h : hospitals) {
+                    GeoPoint p = new GeoPoint();
+                    p.setLatitude(h.getLatitude());
+                    p.setLongitude(h.getLongitude());
+                    pointList.add(p);
+                }
+                continue;
+            }
+            //尝试查询医院别名
+            hospitals = hospitalMapper.queryByAlias(name);
+            if (hospitals != null && hospitals.size() > 0) {
+                for (Hospital h : hospitals) {
+                    GeoPoint p = new GeoPoint();
+                    p.setLatitude(h.getLatitude());
+                    p.setLongitude(h.getLongitude());
+                    pointList.add(p);
+                }
+                continue;
+            }
+            //尝试查询t_place地点数据
+            List<PointPlace> pointPlaces = placeMapper.queryPointPlaceByName(name);
+            if (pointPlaces != null && pointPlaces.size() > 0) {
+                for (PointPlace place : pointPlaces) {
+                    GeoPoint p = new GeoPoint();
+                    p.setLatitude(Double.parseDouble(place.getLatitude()));
+                    p.setLongitude(Double.parseDouble(place.getLongitude()));
+                    pointList.add(p);
+                }
+                continue;
+            }
+            pointPlaces = placeMapper.queryPointPlaceByName(name + "%");
+            if (pointPlaces != null && pointPlaces.size() > 0) {
+                for (PointPlace place : pointPlaces) {
+                    GeoPoint p = new GeoPoint();
+                    p.setLatitude(Double.parseDouble(place.getLatitude()));
+                    p.setLongitude(Double.parseDouble(place.getLongitude()));
+                    pointList.add(p);
+                }
+                continue;
+            }
+            //尝试调用api
+
+        }
+
     }
 
     /**
