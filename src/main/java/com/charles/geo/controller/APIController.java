@@ -4,7 +4,7 @@ import com.charles.geo.model.InformationResponse;
 import com.charles.geo.model.QueryRequest;
 import com.charles.geo.service.process.IMainQueryService;
 import com.charles.geo.utils.QueryRequestFactory;
-import net.sf.json.JSONObject;
+//import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,8 +48,8 @@ public class APIController {
             QueryRequest queryRequest = queryRequestFactory.createQuery(text, null, null);
             InformationResponse informationResponse = mainQueryService.handler(queryRequest);
             //将推荐结果以json的格式返回
-            JSONObject jsonObject = JSONObject.fromObject(informationResponse);
-            out.write(jsonObject.toString().getBytes("utf-8"));
+//            JSONObject jsonObject = JSONObject.fromObject(informationResponse);
+//            out.write(jsonObject.toString().getBytes("utf-8"));
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();

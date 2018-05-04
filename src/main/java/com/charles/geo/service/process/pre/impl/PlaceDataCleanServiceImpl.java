@@ -64,6 +64,7 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
                 }
             }
         }
+        mustSave.removeAll(toRemove);
         regionList.removeAll(toRemove);
         //找能够转化为经纬度的行政区
         Map<GeoPoint, Region> map = new HashMap<GeoPoint, Region>();
