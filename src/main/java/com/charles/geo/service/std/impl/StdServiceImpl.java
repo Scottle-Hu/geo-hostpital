@@ -139,8 +139,12 @@ public class StdServiceImpl implements IStdService {
                 continue;
             }
             //尝试调用api
-
+            getGeoPointByAPI(pointNames, regionList, pointList);
         }
+
+    }
+
+    private void getGeoPointByAPI(List<String> pointNames, List<Region> regionList, List<GeoPoint> pointList) {
 
     }
 
