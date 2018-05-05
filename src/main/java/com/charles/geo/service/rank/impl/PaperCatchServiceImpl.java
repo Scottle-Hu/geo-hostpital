@@ -2,6 +2,8 @@ package com.charles.geo.service.rank.impl;
 
 import com.charles.geo.model.Paper;
 import com.charles.geo.service.rank.IPaperCatchService;
+import com.charles.geo.utils.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -92,17 +94,17 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
      * @return 论文对象列表
      */
     public List<Paper> catchPaper(String colleage, String disease) {
-        System.out.println("检索的大学：" + colleage + ",检索的疾病：" + disease);
+        //System.out.println("检索的大学：" + colleage + ",检索的疾病：" + disease);
         List<Paper> paperList = new ArrayList<Paper>();
         //构造一级请求的url
         String url = getUrl1(colleage, disease);
         String content = getContent(url);
-        System.out.println(content);
+        //System.out.println(content);
         //使用一级请求的返回值构造二级请求
         url = getUrl2(content, disease);
         //修改url使得结果按照被引次数排序
         String refUrl = url + sortByRef;
-        System.out.println(refUrl);
+        //System.out.println(refUrl);
         //获取具体论文结果页面源码
         String src = getContent(refUrl);
         //System.out.println(src);
@@ -177,98 +179,114 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
      * @return
      */
     private List<Paper> parseSource(String src) {
-        List<Paper> paperList = new ArrayList<Paper>();
-        src = src.substring(src.indexOf("<TR  bgcolor=#ffffff>"), src.indexOf("<div class='TitleLeftCell'>"));
-        int index = src.indexOf("<a class=\"fz14\"");
-        while (index != -1) {
-            Paper paper = new Paper();
-            int titleStart = src.indexOf(">", index) + 1;
-            int titleEnd = src.indexOf("</a>", titleStart);
-            String title = "";
-            try {
-                title = src.substring(titleStart, titleEnd);
-                title = title.replace("<font class=Mark>", "")
-                        .replace("</font>", "");
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            List<Paper> paperList = new ArrayList<Paper>();
+            src = src.substring(src.indexOf("<TR  bgcolor=#ffffff>"), src.indexOf("<div class='TitleLeftCell'>"));
+            int index = src.indexOf("<a class=\"fz14\"");
+            while (index != -1) {
+                Paper paper = new Paper();
+                int titleStart = src.indexOf(">", index) + 1;
+                int titleEnd = src.indexOf("</a>", titleStart);
+                String title = "";
+                try {
+                    title = src.substring(titleStart, titleEnd);
+                    title = title.replace("<font class=Mark>", "")
+                            .replace("</font>", "");
+                    title = StringUtil.clearStringFromWeb(title);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setTitle(title);
+                //System.out.println("标题：" + title);
+                int authorStart = src.indexOf("<td class='author_flag'>");
+                int authorEnd = src.indexOf("</td>", authorStart);
+                String authors = "";
+                try {
+                    String authorList = src.substring(src.indexOf("<a", authorStart), authorEnd);
+                    //处理作者列表
+                    authors = StringUtil.clearStringFromWeb(parseAuthor(authorList));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setAuthor(authors);
+                //System.out.println("作者：" + authors);
+                int sourceStart = src.indexOf("<a", authorEnd);
+                sourceStart = src.indexOf(">", sourceStart) + 1;
+                int sourceEnd = src.indexOf("</a>", sourceStart);
+                String source = "";
+                try {
+                    source = src.substring(sourceStart, sourceEnd);
+                    source = StringUtil.clearStringFromWeb(source);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setSource(source);
+                //System.out.println("来源：" + source);
+                int timeStart = src.indexOf("<td", sourceEnd);
+                timeStart = src.indexOf(">", timeStart) + 1;
+                int timeEnd = src.indexOf("</td>", timeStart);
+                String time = "";
+                try {
+                    time = src.substring(timeStart, timeEnd).trim();
+                    time = StringUtil.clearStringFromWeb(time);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setPublishTime(time);
+                //System.out.println("时间：" + time);
+                int refStart = src.indexOf("<a", timeEnd);
+                refStart = src.indexOf(">", refStart) + 1;
+                int refEnd = src.indexOf("</a>", refStart);
+                int refNum = 0;
+                try {
+                    String ref = src.substring(refStart, refEnd);
+                    if (StringUtils.isBlank(ref)) {
+                        refNum = 0;
+                    } else {
+                        refNum = Integer.parseInt(ref);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setReference(refNum);
+                //System.out.println("被引：" + refNum);
+                int dnumStart = src.indexOf("<span class=\"downloadCount\">") + 33;
+                dnumStart = src.indexOf(">", dnumStart) + 1;
+                int dnumEnd = src.indexOf("</a>", dnumStart);
+                int dnum2 = 0;
+                try {
+                    String dnum = src.substring(dnumStart, dnumEnd);
+                    if (StringUtils.isBlank(dnum)) {
+                        dnum2 = 0;
+                    } else {
+                        dnum2 = Integer.parseInt(dnum);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                paper.setDnum(dnum2);
+                //System.out.println("下载：" + dnum2);
+                String url = "";
+                int urlStart = src.indexOf("<a target=\"online_open\"");
+                if (urlStart != -1) {
+                    int hrefStart = src.indexOf("href='", urlStart) + 6;
+                    int hrefEnd = src.indexOf("'", hrefStart);
+                    url = prefix + src.substring(hrefStart, hrefEnd);
+                    src = src.substring(hrefEnd + 6);
+                } else {
+                    src = src.substring(dnumEnd + 4);
+                }
+                paper.setUrl(url);
+                //System.out.println("url：" + url);
+                //System.out.println();
+                index = src.indexOf("<a class=\"fz14\"");
+                paperList.add(paper);
             }
-            paper.setTitle(title);
-            System.out.println("标题：" + title);
-            int authorStart = src.indexOf("<td class='author_flag'>");
-            int authorEnd = src.indexOf("</td>", authorStart);
-            String authors = "";
-            try {
-                String authorList = src.substring(src.indexOf("<a", authorStart), authorEnd);
-                //处理作者列表
-                authors = parseAuthor(authorList);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paper.setAuthor(authors);
-            System.out.println("作者：" + authors);
-            int sourceStart = src.indexOf("<a", authorEnd);
-            sourceStart = src.indexOf(">", sourceStart) + 1;
-            int sourceEnd = src.indexOf("</a>", sourceStart);
-            String source = "";
-            try {
-                source = src.substring(sourceStart, sourceEnd);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paper.setSource(source);
-            System.out.println("来源：" + source);
-            int timeStart = src.indexOf("<td", sourceEnd);
-            timeStart = src.indexOf(">", timeStart) + 1;
-            int timeEnd = src.indexOf("</td>", timeStart);
-            String time = "";
-            try {
-                time = src.substring(timeStart, timeEnd).trim();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paper.setPublishTime(time);
-            System.out.println("时间：" + time);
-            int refStart = src.indexOf("<a", timeEnd);
-            refStart = src.indexOf(">", refStart) + 1;
-            int refEnd = src.indexOf("</a>", refStart);
-            int refNum = 0;
-            try {
-                String ref = src.substring(refStart, refEnd);
-                refNum = Integer.parseInt(ref);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paper.setReference(refNum);
-            System.out.println("被引：" + refNum);
-            int dnumStart = src.indexOf("<span class=\"downloadCount\">") + 33;
-            dnumStart = src.indexOf(">", dnumStart) + 1;
-            int dnumEnd = src.indexOf("</a>", dnumStart);
-            int dnum2 = 0;
-            try {
-                String dnum = src.substring(dnumStart, dnumEnd);
-                dnum2 = Integer.parseInt(dnum);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paper.setDnum(dnum2);
-            System.out.println("下载：" + dnum2);
-            String url = "";
-            int urlStart = src.indexOf("<a target=\"online_open\"");
-            if (urlStart != -1) {
-                int hrefStart = src.indexOf("href='", urlStart) + 6;
-                int hrefEnd = src.indexOf("'", hrefStart);
-                url = prefix + src.substring(hrefStart, hrefEnd);
-                src = src.substring(hrefEnd + 6);
-            } else {
-                src = src.substring(dnumEnd + 4);
-            }
-            paper.setUrl(url);
-            System.out.println("url：" + url);
-            System.out.println();
-            index = src.indexOf("<a class=\"fz14\"");
-            paperList.add(paper);
+            return paperList;
+        } catch (Exception e) {
+            //e.printStackTrace();
+            return Collections.emptyList();
         }
-        return paperList;
     }
 
     private String parseAuthor(String author) {
@@ -285,10 +303,13 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
     }
 
     //测试用例
-    public static void main(String[] args) {
-        PaperCatchServiceImpl instance = new PaperCatchServiceImpl();
-        instance.getPaper("武汉大学", "白血病");
-        //测试缓存
-        instance.getPaper("武汉大学", "白血病");
-    }
+//    public static void main(String[] args) throws InterruptedException {
+//        PaperCatchServiceImpl instance = new PaperCatchServiceImpl();
+//        instance.getPaper("北京大学", "白血病");
+//        instance.getPaper("武汉大学", "白血病");
+//        instance.getPaper("华中科技大学", "白血病");
+//
+//        //测试缓存
+//        instance.getPaper("武汉大学", "白血病");
+//    }
 }

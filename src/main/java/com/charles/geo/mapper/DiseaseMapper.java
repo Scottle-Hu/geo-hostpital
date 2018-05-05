@@ -25,4 +25,12 @@ public interface DiseaseMapper {
      * @return
      */
     List<Disease> findByDepart(String depart);
+
+    /**
+     * 根据药物名称查找疾病名称
+     *
+     * @param drug
+     * @return
+     */
+    List<String> findDiseaseNameByDrug(String drug);
 }

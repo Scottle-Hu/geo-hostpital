@@ -92,4 +92,17 @@ public class Paper {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Override
+    public String toString() {
+        return "Paper{" +
+                "title='" + title + '\'' +
+                ", publishTime='" + publishTime + '\'' +
+                ", author='" + author + '\'' +
+                ", dnum=" + dnum +
+                ", source='" + source + '\'' +
+                ", reference=" + reference +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

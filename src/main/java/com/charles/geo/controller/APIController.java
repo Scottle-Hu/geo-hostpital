@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,32 +39,20 @@ public class APIController {
     @Autowired
     private IMainQueryService mainQueryService;
 
-    @RequestMapping(value = "/main", method = RequestMethod.POST)
-    public void mainApi(@RequestParam("text") String text,
-                        HttpServletRequest request,
-                        HttpServletResponse response) {
-        OutputStream out = null;
+    @RequestMapping(value = "/main", method = RequestMethod.GET)
+    public @ResponseBody
+    Object mainApi(@RequestParam("text") String text,
+                   HttpServletRequest request,
+                   HttpServletResponse response) {
+        InformationResponse informationResponse = new InformationResponse();
         try {
-            out = response.getOutputStream();
             QueryRequest queryRequest = queryRequestFactory.createQuery(text, null, null);
-            InformationResponse informationResponse = mainQueryService.handler(queryRequest);
-            //将推荐结果以json的格式返回
-//            JSONObject jsonObject = JSONObject.fromObject(informationResponse);
-//            out.write(jsonObject.toString().getBytes("utf-8"));
-            out.flush();
+            informationResponse = mainQueryService.handler(queryRequest);
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("调用api出现未知问题");
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    LOGGER.error("关闭输出流出现问题");
-                }
-            }
         }
+        return informationResponse;
     }
 
     //静态页面

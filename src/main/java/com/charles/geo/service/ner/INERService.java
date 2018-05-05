@@ -22,4 +22,6 @@ public interface INERService {
      */
     void nerFromText(String text, List<GeoPoint> geoPoints, List<Region> regionList, List<Disease> diseaseList);
 
+    public void nerString(String text, List<String> regionNames, List<String> placeNames, List<String> peopleNames, List<String> diseaseNames);
+
 }

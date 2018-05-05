@@ -31,17 +31,17 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 医疗机构最大推荐数目
      */
-    private final int HOS_MAX_RECOMMAND_NUM = 10;
+    private final int HOS_MAX_RECOMMAND_NUM = 8;
 
     /**
      * 医疗机构最小推荐数目
      */
-    private final int HOS_MIN_RECOMMAND_NUM = 2;
+    private final int HOS_MIN_RECOMMAND_NUM = 1;
 
     /**
      * 学校最大推荐数目
      */
-    private final int COLLE_MAX_RECOMMAND_NUM = 9;
+    private final int COLLE_MAX_RECOMMAND_NUM = 4;
 
     /**
      * 学校最小推荐数目
@@ -91,6 +91,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
      * @return
      */
     private List<Hospital> getHospitals(QueryRequest request) {
+        System.out.println("开始题名医院:" + System.currentTimeMillis());
         List<Hospital> hospitalList = new ArrayList<Hospital>();
         Set<Hospital> hospitalSet = new HashSet<Hospital>();
         List<Region> regionList = request.getRegionList();  //行政区划集合
@@ -101,7 +102,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             //构造查询条件
             if (region.getType().equals(Constant.COUNTY)) {  //区县级别
                 Region father = placeMapper.findRegionById(region.getFatherId());
-                q = "%" + father.getName() + " " + region.getName() + "%";
+                q = father.getName() + " " + region.getName();
                 hospitalSet.addAll(hospitalMapper.queryByRegion(q));
             } else if (region.getType().equals(Constant.CITY)) {  //市级别
                 q = region.getName() + "%"; //模糊匹配
@@ -114,6 +115,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 }
             }
         }
+        System.out.println("结束行政区题名医院:" + System.currentTimeMillis());
         //获取每个经纬度节点附近的医疗机构，取并集
         for (GeoPoint point : pointList) {
             double longitude = point.getLongitude();
@@ -127,6 +129,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             hospitalSet.addAll(hospitalMapper.queryByRange(map));
         }
         int level = 1;
+        System.out.println("结束经纬度题名医院:" + System.currentTimeMillis());
         //如果医院候选列表过少，将行政区划向上扩张
         while (hospitalSet.size() < HOS_MIN_RECOMMAND_NUM) {
             if (level > 2) {
@@ -160,12 +163,14 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             level++;
         }
+        System.out.println("结束扩充医院:" + System.currentTimeMillis());
         //根据疾病名称排序筛选
         hospitalList.addAll(hospitalSet);
         hospitalList = rankService.rankHospital(hospitalList, request);
         if (hospitalList.size() > HOS_MAX_RECOMMAND_NUM) {  //多于最多推荐个数，筛选前N个
             hospitalList = hospitalList.subList(0, HOS_MAX_RECOMMAND_NUM);
         }
+        System.out.println("结束筛选医院:" + System.currentTimeMillis());
         return hospitalList;
     }
 
@@ -176,27 +181,41 @@ public class MainQueryServiceImpl implements IMainQueryService {
      * @return
      */
     private List<Colleage> getColleages(QueryRequest request) {
+        System.out.println("开始题名大学:" + System.currentTimeMillis());
         List<Colleage> colleageList = new ArrayList<Colleage>();
         Set<Colleage> colleageSet = new HashSet<Colleage>();
         List<Region> regionList = request.getRegionList();  //行政区划集合
         List<GeoPoint> pointList = request.getPointList();  //经纬度点集合
         List<Disease> diseaseList = request.getDiseaseList();
         //获取行政区划下面的所有大学
+//        for (Region region : regionList) {
+//            if (region.getType().equals(Constant.COUNTY)) {
+//                colleageSet.addAll(universityMapper.queryByRegion(region.getId()));
+//            } else if (region.getType().equals(Constant.CITY)) {
+//                List<Region> sons = placeMapper.findRegionByFather(region.getId());
+//                for (Region r : sons) {
+//                    colleageSet.addAll(universityMapper.queryByRegion(r.getId()));
+//                }
+//            } else {
+//                List<Region> sons = placeMapper.findRegionByFather(region.getId());
+//                for (Region r : sons) {
+//                    List<Region> sonList = placeMapper.findRegionByFather(r.getId());
+//                    for (Region s : sonList) {
+//                        colleageSet.addAll(universityMapper.queryByRegion(s.getId()));
+//                    }
+//                }
+//            }
+//        }
+        //目前大学父级是市级别的，提名方法如下：
         for (Region region : regionList) {
             if (region.getType().equals(Constant.COUNTY)) {
-                colleageSet.addAll(universityMapper.queryByRegion(region.getId()));
+                colleageSet.addAll(universityMapper.queryByRegion(region.getFatherId()));
             } else if (region.getType().equals(Constant.CITY)) {
-                List<Region> sons = placeMapper.findRegionByFather(region.getId());
-                for (Region r : sons) {
-                    colleageSet.addAll(universityMapper.queryByRegion(r.getId()));
-                }
+                colleageSet.addAll(universityMapper.queryByRegion(region.getId()));
             } else {
                 List<Region> sons = placeMapper.findRegionByFather(region.getId());
                 for (Region r : sons) {
-                    List<Region> sonList = placeMapper.findRegionByFather(r.getId());
-                    for (Region s : sonList) {
-                        colleageSet.addAll(universityMapper.queryByRegion(s.getId()));
-                    }
+                    colleageSet.addAll(universityMapper.queryByRegion(r.getId()));
                 }
             }
         }
@@ -212,21 +231,30 @@ public class MainQueryServiceImpl implements IMainQueryService {
             map.put("latitudeMax", latitude + geoRank);
             colleageSet.addAll(universityMapper.queryByRange(map));
         }
+        System.out.println("结束题名大学:" + System.currentTimeMillis());
+        //初步筛选
+
         //填充大学的论文集用于排序
+        Set<String> ds = new HashSet<String>();
+        for (Disease d : diseaseList) {
+            ds.add(d.getName());
+        }
         for (Colleage colleage : colleageSet) {
             Map<String, List<Paper>> paperMap = new HashMap<String, List<Paper>>();
-            for (Disease d : diseaseList) {
-                List<Paper> paper = paperCatchService.getPaper(colleage.getName(), d.getName());
-                paperMap.put(d.getName(), paper);
+            for (String d : ds) {
+                List<Paper> paper = paperCatchService.getPaper(colleage.getName(), d);
+                paperMap.put(d, paper);
             }
             colleage.setPaperList(paperMap);
         }
+        System.out.println("结束抓取论文:" + System.currentTimeMillis());
         //排序筛选
         colleageList.addAll(colleageSet);
         colleageList = rankService.rankColleage(colleageList, request);
         if (colleageList.size() > COLLE_MAX_RECOMMAND_NUM) {
             colleageList = colleageList.subList(0, COLLE_MAX_RECOMMAND_NUM);
         }
+        System.out.println("结束筛选大学:" + System.currentTimeMillis());
         return colleageList;
     }
 }

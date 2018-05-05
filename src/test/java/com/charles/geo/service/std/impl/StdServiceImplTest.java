@@ -1,5 +1,6 @@
 package com.charles.geo.service.std.impl;
 
+import com.charles.geo.model.Disease;
 import com.charles.geo.model.GeoPoint;
 import com.charles.geo.model.Region;
 import com.charles.geo.service.process.pre.IPlaceDataCleanService;
@@ -71,13 +72,24 @@ public class StdServiceImplTest {
         for (GeoPoint p : pointList) {
             System.out.println(p);
         }
+        start = System.currentTimeMillis();
         placeDataCleanService.clean(pointList, regionList);
+        System.out.println("预处理过程耗时：" + (System.currentTimeMillis() - start) / 1000 + "秒");
         System.out.println("预处理之后");
         for (Region region : regionList) {
             System.out.println(region);
         }
         for (GeoPoint p : pointList) {
             System.out.println(p);
+        }
+    }
+
+    @Test
+    public void test03() {
+        String d = "清喉咽颗粒";
+        List<Disease> diseases = stdService.convertMedicine2Disease(d);
+        for (Disease disease : diseases) {
+            System.out.println(disease);
         }
     }
 

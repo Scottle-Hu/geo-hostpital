@@ -85,4 +85,9 @@ public class Colleage {
                 ", paperList=" + paperList +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Colleage && ((Colleage) obj).getName().equals(this.name);
+    }
 }

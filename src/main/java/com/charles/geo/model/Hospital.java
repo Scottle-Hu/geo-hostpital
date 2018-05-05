@@ -166,6 +166,6 @@ public class Hospital {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Hospital && ((Hospital) obj).getId().equals(id);
+        return obj instanceof Hospital && ((Hospital) obj).getName().equals(this.name);
     }
 }

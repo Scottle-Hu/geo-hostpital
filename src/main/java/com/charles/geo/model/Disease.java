@@ -49,4 +49,14 @@ public class Disease {
     public void setDepart(String depart) {
         this.depart = depart;
     }
+
+    @Override
+    public String toString() {
+        return "Disease{" +
+                "id='" + id + '\'' +
+                ", depart='" + depart + '\'' +
+                ", name='" + name + '\'' +
+                ", medicalList=" + medicalList +
+                '}';
+    }
 }

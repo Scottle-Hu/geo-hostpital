@@ -18,11 +18,11 @@
 
         <!-- 关键配置 -->
         <!-- 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时 -->
-        <property name="initialSize" value="5"/>
+        <property name="initialSize" value="2"/>
         <!-- 最小连接池数量 -->
         <property name="minIdle" value="1"/>
         <!-- 最大连接池数量 -->
-        <property name="maxActive" value="10"/>
+        <property name="maxActive" value="8"/>
         <!-- 配置获取连接等待超时的时间 -->
         <property name="maxWait" value="10000"/>
 

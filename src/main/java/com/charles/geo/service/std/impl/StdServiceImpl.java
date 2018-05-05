@@ -51,7 +51,8 @@ public class StdServiceImpl implements IStdService {
     }
 
     public List<Disease> convertMedicine2Disease(String medicine) {
-        return null;
+        List<String> diseaseNameByDrug = diseaseMapper.findDiseaseNameByDrug(medicine);
+        return stdDisease(diseaseNameByDrug);
     }
 
     public void convert2StdName(List<String> regionNames, List<String> pointNames,
@@ -159,7 +160,7 @@ public class StdServiceImpl implements IStdService {
                 String api = getAPiUrl(name2);
                 LOGGER.info("调用api查询经纬度：" + name2);
                 String result = getContent(api);
-                System.out.println(result);
+//                System.out.println(result);
                 int statuStart = result.indexOf("status\":");
                 if (statuStart != -1) {
                     int statuEnd = result.indexOf(",", statuStart);
@@ -188,7 +189,9 @@ public class StdServiceImpl implements IStdService {
                 LOGGER.error("api查询过程出错");
             }
         }
-        pointList.add(tmp);
+        if (maxConfidence >= 50) {  //可信度过小不予采纳
+            pointList.add(tmp);
+        }
     }
 
     private String getAPiUrl(String name) {

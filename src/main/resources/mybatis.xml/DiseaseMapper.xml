@@ -8,8 +8,12 @@
     <!-- 定义Expert类型 -->
     <resultMap type="Disease" id="DiseaseMap">
         <result property="id" column="id"/>
-        <result property="name" column="name"/>
+        <result property="name" column="disease"/>
         <result property="depart" column="depart"/>
+    </resultMap>
+
+    <resultMap id="StringMap" type="String">
+        <result property="disease" column="disease"/>
     </resultMap>
 
 
@@ -21,6 +25,11 @@
     <!--通过科室名称查找-->
     <select id="findByDepart" parameterType="String" resultMap="DiseaseMap">
         SELECT * FROM t_disease WHERE depart=#{_param}
+    </select>
+
+    <!--findDiseaseNameByDrug-->
+    <select id="findDiseaseNameByDrug" parameterType="String" resultMap="StringMap">
+      SELECT disease FROM t_drug WHERE drug LIKE #{_param}
     </select>
 
 </mapper>
