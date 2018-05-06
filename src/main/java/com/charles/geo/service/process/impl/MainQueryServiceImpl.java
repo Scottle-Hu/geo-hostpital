@@ -8,10 +8,16 @@ import com.charles.geo.service.process.IMainQueryService;
 import com.charles.geo.service.rank.IPaperCatchService;
 import com.charles.geo.service.rank.IRankService;
 import com.charles.geo.utils.Constant;
+import com.charles.geo.utils.DBUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -31,7 +37,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 医疗机构最大推荐数目
      */
-    private final int HOS_MAX_RECOMMAND_NUM = 8;
+    private final int HOS_MAX_RECOMMAND_NUM = 5;
 
     /**
      * 医疗机构最小推荐数目
@@ -41,7 +47,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 学校最大推荐数目
      */
-    private final int COLLE_MAX_RECOMMAND_NUM = 4;
+    private final int COLLE_MAX_RECOMMAND_NUM = 3;
 
     /**
      * 学校最小推荐数目
@@ -51,7 +57,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 按照经纬度查询的时候取附近的经纬度范围
      */
-    private double geoRank = 0.036;  //4KM
+    private double geoRank = 0.036;  //2KM
 
     @Autowired
     private IRankService rankService;
@@ -67,6 +73,20 @@ public class MainQueryServiceImpl implements IMainQueryService {
 
     @Autowired
     private IPaperCatchService paperCatchService;
+
+    private Map<String, List<String>> hospitalPlace2Id = new HashMap<String, List<String>>();
+
+    @PostConstruct
+    public void init() {
+        System.out.println("==========读取医院信息到内存==========");
+        List<String> placeList = hospitalMapper.findAllPlace();
+        for (String p : placeList) {
+            System.out.print(".");
+            List<String> ids = hospitalMapper.findIdsByPlace(p);
+            hospitalPlace2Id.put(p, ids);
+        }
+        System.out.println("==========读取医院信息到内存==========");
+    }
 
     /**
      * @param request
@@ -103,15 +123,25 @@ public class MainQueryServiceImpl implements IMainQueryService {
             if (region.getType().equals(Constant.COUNTY)) {  //区县级别
                 Region father = placeMapper.findRegionById(region.getFatherId());
                 q = father.getName() + " " + region.getName();
-                hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                List<String> ids = hospitalPlace2Id.get(q);
+                hospitalSet.addAll(queryHospitalByIds(ids));
             } else if (region.getType().equals(Constant.CITY)) {  //市级别
-                q = region.getName() + "%"; //模糊匹配
-                hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                //效率考量，用多次精确查询替代模糊查询
+                List<Region> sons = placeMapper.findRegionByFather(region.getId());
+                for (Region s : sons) {
+                    q = region.getName() + " " + s.getName();
+                    List<String> ids = hospitalPlace2Id.get(q);
+                    hospitalSet.addAll(queryHospitalByIds(ids));
+                }
             } else { //省级别,找到所有的市然后查询
                 List<Region> sons = placeMapper.findRegionByFather(region.getId());
                 for (Region s : sons) {
-                    q = s.getName() + "%";
-                    hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                    List<Region> gsons = placeMapper.findRegionByFather(s.getId());
+                    for (Region g : gsons) {
+                        q = s.getName() + " " + g.getName();
+                        List<String> ids = hospitalPlace2Id.get(q);
+                        hospitalSet.addAll(queryHospitalByIds(ids));
+                    }
                 }
             }
         }
@@ -126,7 +156,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             map.put("longitudeMax", longitude + geoRank);
             map.put("latitudeMin", latitude - geoRank);
             map.put("latitudeMax", latitude + geoRank);
-            hospitalSet.addAll(hospitalMapper.queryByRange(map));
+            hospitalSet.addAll(queryHospitalByRange(map));
         }
         int level = 1;
         System.out.println("结束经纬度题名医院:" + System.currentTimeMillis());
@@ -141,8 +171,12 @@ public class MainQueryServiceImpl implements IMainQueryService {
                     for (Region region : regionList) {
                         if (region.getType().equals(Constant.COUNTY)) {
                             Region f = placeMapper.findRegionById(region.getFatherId());
-                            String q = f.getName() + "%";
-                            hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                            List<Region> sons = placeMapper.findRegionByFather(f.getId());
+                            for (Region s : sons) {
+                                String q = f.getName() + " " + s.getName();
+                                List<String> ids = hospitalPlace2Id.get(q);
+                                hospitalSet.addAll(queryHospitalByIds(ids));
+                            }
                         }
                     }
                     break;
@@ -153,8 +187,12 @@ public class MainQueryServiceImpl implements IMainQueryService {
                             Region f = placeMapper.findRegionById(region.getFatherId());
                             List<Region> sons = placeMapper.findRegionByFather(f.getId());
                             for (Region s : sons) {
-                                String q = s.getName() + "%";
-                                hospitalSet.addAll(hospitalMapper.queryByRegion(q));
+                                List<Region> gsons = placeMapper.findRegionByFather(s.getId());
+                                for (Region gs : gsons) {
+                                    String q = s.getName() + " " + gs.getName();
+                                    List<String> ids = hospitalPlace2Id.get(q);
+                                    hospitalSet.addAll(queryHospitalByIds(ids));
+                                }
                             }
                         }
                     }
@@ -164,8 +202,20 @@ public class MainQueryServiceImpl implements IMainQueryService {
             level++;
         }
         System.out.println("结束扩充医院:" + System.currentTimeMillis());
-        //根据疾病名称排序筛选
         hospitalList.addAll(hospitalSet);
+        //不知怎么的，set没法去重，手动再次去重
+        Set<String> names = new HashSet<String>();
+        Iterator<Hospital> iterator = hospitalList.iterator();
+        while (iterator.hasNext()) {
+            Hospital h = iterator.next();
+            String n = h.getName();
+            if (names.contains(n)) {
+                iterator.remove();
+            } else {
+                names.add(n);
+            }
+        }
+        //根据疾病名称排序筛选
         hospitalList = rankService.rankHospital(hospitalList, request);
         if (hospitalList.size() > HOS_MAX_RECOMMAND_NUM) {  //多于最多推荐个数，筛选前N个
             hospitalList = hospitalList.subList(0, HOS_MAX_RECOMMAND_NUM);
@@ -233,7 +283,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
         }
         System.out.println("结束题名大学:" + System.currentTimeMillis());
         //初步筛选
-
+        System.out.println("提名大学数量：" + colleageSet.size());
         //填充大学的论文集用于排序
         Set<String> ds = new HashSet<String>();
         for (Disease d : diseaseList) {
@@ -248,13 +298,96 @@ public class MainQueryServiceImpl implements IMainQueryService {
             colleage.setPaperList(paperMap);
         }
         System.out.println("结束抓取论文:" + System.currentTimeMillis());
-        //排序筛选
         colleageList.addAll(colleageSet);
+        //不知怎么的，set没法去重，手动再次去重
+        Set<String> names = new HashSet<String>();
+        Iterator<Colleage> iterator = colleageList.iterator();
+        while (iterator.hasNext()) {
+            Colleage c = iterator.next();
+            String n = c.getName();
+            if (names.contains(n)) {
+                iterator.remove();
+            } else {
+                names.add(n);
+            }
+        }
+        //排序筛选
         colleageList = rankService.rankColleage(colleageList, request);
         if (colleageList.size() > COLLE_MAX_RECOMMAND_NUM) {
             colleageList = colleageList.subList(0, COLLE_MAX_RECOMMAND_NUM);
         }
         System.out.println("结束筛选大学:" + System.currentTimeMillis());
         return colleageList;
+    }
+
+    private List<Hospital> queryHospitalByIds(List<String> ids) {
+        if (ids == null || ids.size() == 0) {
+            return Collections.emptyList();
+        }
+        Connection con = DBUtil.getConnection();
+        try {
+            Statement sta = con.createStatement();
+            String sql = "select * from t_hospital where id in (";
+            for (String id : ids) {
+                sql += id + ",";
+            }
+            sql = sql.substring(0, sql.length() - 1) + ")";
+            System.out.println(sql);
+            ResultSet resultSet = sta.executeQuery(sql);
+            List<Hospital> hospitals = new ArrayList<Hospital>();
+            while (resultSet.next()) {
+                Hospital hospital = new Hospital();
+                hospital.setId(resultSet.getString("id"));
+                hospital.setAddress(resultSet.getString("address"));
+                hospital.setAlias(resultSet.getString("alias"));
+                hospital.setIntroduction(resultSet.getString("introduction"));
+                hospital.setLatitude(resultSet.getDouble("latitude"));
+                hospital.setLongitude(resultSet.getDouble("longitude"));
+                hospital.setLevel(resultSet.getString("level"));
+                hospital.setName(resultSet.getString("name"));
+                hospital.setPlace(resultSet.getString("place"));
+                hospital.setQuality(resultSet.getString("quality"));
+                hospital.setUrl(resultSet.getString("url"));
+                hospitals.add(hospital);
+            }
+            return hospitals;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<Hospital> queryHospitalByRange(Map<String, Double> map) {
+        if (map == null || map.size() == 0) {
+            return Collections.emptyList();
+        }
+        Connection con = DBUtil.getConnection();
+        try {
+            Statement sta = con.createStatement();
+            String sql = "select * from t_hospital where longitude<" + map.get("longitudeMax") + " and longitude>"
+                    + map.get("longitudeMin") + " and latitude<" + map.get("latitudeMax") + " and latitude>" + map.get("latitudeMin");
+            System.out.println(sql);
+            ResultSet resultSet = sta.executeQuery(sql);
+            List<Hospital> hospitals = new ArrayList<Hospital>();
+            while (resultSet.next()) {
+                Hospital hospital = new Hospital();
+                hospital.setId(resultSet.getString("id"));
+                hospital.setAddress(resultSet.getString("address"));
+                hospital.setAlias(resultSet.getString("alias"));
+                hospital.setIntroduction(resultSet.getString("introduction"));
+                hospital.setLatitude(resultSet.getDouble("latitude"));
+                hospital.setLongitude(resultSet.getDouble("longitude"));
+                hospital.setLevel(resultSet.getString("level"));
+                hospital.setName(resultSet.getString("name"));
+                hospital.setPlace(resultSet.getString("place"));
+                hospital.setQuality(resultSet.getString("quality"));
+                hospital.setUrl(resultSet.getString("url"));
+                hospitals.add(hospital);
+            }
+            return hospitals;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 }

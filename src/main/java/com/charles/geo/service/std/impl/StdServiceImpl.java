@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 
@@ -34,6 +35,8 @@ public class StdServiceImpl implements IStdService {
     private final String apiUrl = "http://api.map.baidu.com/geocoder/v2/?address=(?)&output=json" +
             "&ak=GpTMhCzysDnj632F3x14G8QbOBGyuMKr";
 
+    private Map<String, List<String>> alias2Id = new HashMap<String, List<String>>();
+
     @Autowired
     private DiseaseMapper diseaseMapper;
 
@@ -45,6 +48,21 @@ public class StdServiceImpl implements IStdService {
 
     @Autowired
     private UniversityMapper universityMapper;
+
+    @PostConstruct
+    public void init() {
+        System.out.println("========开始读取别名数据到内存中=======");
+        List<Alias> allAliasNameAndId = placeMapper.findAllAliasNameAndId();
+        for (Alias alias : allAliasNameAndId) {
+            String a = alias.getAlias();
+            if (alias2Id.get(a) == null) {
+                alias2Id.put(a, new ArrayList<String>());
+            }
+            alias2Id.get(a).add(alias.getRegionId());
+        }
+
+        System.out.println("========结束读取别名数据到内存中=======");
+    }
 
     public GeoPoint convertPOI2Point(String place) {
         return null;
@@ -58,21 +76,53 @@ public class StdServiceImpl implements IStdService {
     public void convert2StdName(List<String> regionNames, List<String> pointNames,
                                 List<Region> regionList, List<GeoPoint> pointList) {
         //行政区划别名识别直接参照t_alias
-        Set<String> regionIds = new HashSet<String>();
+        Map<String, List<String>> regionIds = new HashMap<String, List<String>>();
         for (String region : regionNames) {
-            List<String> idList = placeMapper.findPlaceIdByAlias(region);
-            regionIds.addAll(idList);
+            List<String> idList = alias2Id.get(region);
+            if (idList != null) {
+                if (regionIds.get(region) == null) {
+                    regionIds.put(region, new ArrayList<String>());
+                }
+                regionIds.get(region).addAll(idList);
+            }
         }
         Iterator<String> iterator = pointNames.iterator();
         while (iterator.hasNext()) {
             String point = iterator.next();
-            List<String> idList = placeMapper.findPlaceIdByAlias(point);
+            List<String> idList = alias2Id.get(point);
             if (idList != null && idList.size() > 0) {
                 iterator.remove();
+                if (regionIds.get(point) == null) {
+                    regionIds.put(point, new ArrayList<String>());
+                }
+                regionIds.get(point).addAll(idList);
             }
-            regionIds.addAll(idList);
         }
-        for (String id : regionIds) {
+        Map<String, Integer> count = new HashMap<String, Integer>();
+        for (String s : regionNames) {
+            if (count.get(s) == null) {
+                count.put(s, 1);
+            }
+            count.put(s, count.get(s) + 1);
+        }
+        Set<String> ids = new HashSet<String>();
+        //筛选，排除别名对应太多的行政区划
+        double sureNum = 0;
+        for (Map.Entry<String, List<String>> e : regionIds.entrySet()) {
+            if (e.getValue().size() == 1) {
+                sureNum++;
+            }
+        }
+        if (sureNum > 1) {
+            sureNum *= 0.8;
+        }
+        for (Map.Entry<String, List<String>> e : regionIds.entrySet()) {
+            if (e.getValue().size() > sureNum && count.get(e.getKey()) == 1) {
+                continue;
+            }
+            ids.addAll(e.getValue());
+        }
+        for (String id : ids) {
             regionList.add(placeMapper.findRegionById(id));
         }
         /*

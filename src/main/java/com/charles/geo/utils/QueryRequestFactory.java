@@ -19,7 +19,7 @@ import java.util.List;
  * @since 1.0
  */
 @Service("queryRequestFactory")
-public class QueryRequestFactory {
+public class QueryRequestFactory implements IQueryRequestFactory {
 
     /**
      * 日志记录器

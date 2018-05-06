@@ -45,6 +45,9 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
     public void clean(List<GeoPoint> geoPointList, List<Region> regionList) {
         Set<Region> mustSave = new HashSet<Region>();
         Set<Region> toRemove = new HashSet<Region>();
+        if (regionList != null && regionList.size() == 1) {
+            mustSave.addAll(regionList);
+        }
         for (Region region : regionList) {
             Set<Region> ancestors = allAncestor(region);
             for (Region r : regionList) {
@@ -235,14 +238,18 @@ public class PlaceDataCleanServiceImpl implements IPlaceDataCleanService {
         //test
         System.out.println("k-means聚类结果:" + core);
         //去除离散的点
-        int aveSzie = 0;
+        double aveSzie = 0;
         for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
             aveSzie += e.getValue().size();
         }
-        aveSzie /= core.keySet().size();
-        for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
-            if (e.getValue().size() <= 1) {
-                points.removeAll(e.getValue());
+        if (core.keySet().size() > 0) {
+            aveSzie /= core.keySet().size();
+        }
+        if (aveSzie > 1) {
+            for (Map.Entry<GeoPoint, Set<GeoPoint>> e : core.entrySet()) {
+                if (e.getValue().size() == 1) {
+                    points.removeAll(e.getValue());
+                }
             }
         }
     }

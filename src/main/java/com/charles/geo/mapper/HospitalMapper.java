@@ -12,6 +12,14 @@ import java.util.Map;
 public interface HospitalMapper {
 
     /**
+     * 根据id查询医院
+     *
+     * @param id
+     * @return
+     */
+    Hospital queryById(String id);
+
+    /**
      * 根据经纬度范围查询医院
      *
      * @param map
@@ -50,5 +58,34 @@ public interface HospitalMapper {
      * @return
      */
     List<Hospital> queryByAlias(String name);
+
+    /**
+     * 将所有医院和id读入内存
+     *
+     * @return
+     */
+    List<Hospital> fetchAllNameAndId();
+
+    /**
+     * 根据id集合查找
+     *
+     * @return
+     */
+    List<Hospital> findByIds(List<String> ids);
+
+    /**
+     * 聚合找到所有医院的地区，制作索引
+     *
+     * @return
+     */
+    List<String> findAllPlace();
+
+    /**
+     * 根据地区查找医院id
+     *
+     * @param place
+     * @return
+     */
+    List<String> findIdsByPlace(String place);
 
 }

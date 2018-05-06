@@ -11,6 +11,11 @@ import java.util.List;
 public class InformationResponse {
 
     /**
+     * 响应时长
+     */
+    private String responseTime;
+
+    /**
      * 推荐医院
      */
     private List<Hospital> hospitalList;
@@ -34,5 +39,13 @@ public class InformationResponse {
 
     public void setColleageList(List<Colleage> colleageList) {
         this.colleageList = colleageList;
+    }
+
+    public String getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(String responseTime) {
+        this.responseTime = responseTime;
     }
 }

@@ -8,6 +8,7 @@ import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.DicAnalysis;
 import org.ansj.splitWord.analysis.NlpAnalysis;
+import org.ansj.splitWord.analysis.ToAnalysis;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nlpcn.commons.lang.tire.domain.Forest;
@@ -40,11 +41,16 @@ public class NERServiceImplTest {
         try {
             forest1 = Library.makeForest(Result.class.getResourceAsStream("/dic_disease.dic"));
             forest2 = Library.makeForest(Result.class.getResourceAsStream("/dic_university.dic"));
-            forest3 = Library.makeForest(Result.class.getResourceAsStream("/dic_hospital.dic"));
+//            forest3 = Library.makeForest(Result.class.getResourceAsStream("/dic_hospital.dic"));
             forest4 = Library.makeForest(Result.class.getResourceAsStream("/dic_geo.dic"));
             String str = "东方芝加哥,WHU,武大，武汉大学中南医院，中性白(粒)细胞这是一段，测试自定义词典";
             Result result = DicAnalysis.parse(str, forest1, forest2, forest3, forest4);//传入forest
             List<Term> termList = result.getTerms();
+            for (Term term : termList) {
+                System.out.println(term.getName() + ":" + term.getNatureStr());
+            }
+            result = ToAnalysis.parse("江城海南省海口市和平北路47号");
+            termList = result.getTerms();
             for (Term term : termList) {
                 System.out.println(term.getName() + ":" + term.getNatureStr());
             }

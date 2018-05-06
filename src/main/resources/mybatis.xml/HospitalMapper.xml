@@ -22,6 +22,19 @@
                     select="com.charles.geo.mapper.ExpertMapper.findByHospitalId"/>
     </resultMap>
 
+    <resultMap id="StringMap" type="String">
+        <result property="place" column="place"/>
+    </resultMap>
+
+    <resultMap id="StringMap2" type="String">
+        <result property="id" column="id"/>
+    </resultMap>
+
+    <!--queryById-->
+    <select id="queryById" parameterType="String" resultType="Hospital">
+        SELECT * FROM t_hospital WHERE id=#{_param}
+    </select>
+
 
     <!--根据经纬度范围查询医院-->
     <select id="queryByRange" resultMap="HospitalMap" parameterType="Map">
@@ -50,6 +63,28 @@
     <!--根据医院别名查询-->
     <select id="queryByAlias" parameterType="String" resultMap="HospitalMap">
         SELECT * FROM t_hospital WHERE `alias` LIKE #{_param}
+    </select>
+
+    <!--fetchAllNameAndId-->
+    <select id="fetchAllNameAndId" resultMap="HospitalMap">
+        SELECT id,place FROM t_hospital
+    </select>
+
+    <select id="findByIds" resultMap="HospitalMap">
+        SELECT * FROM t_hospital WHERE id IN
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--找到所有医院地区-->
+    <select id="findAllPlace" resultMap="StringMap">
+        SELECT distinct(place) FROM t_hospital GROUP BY place
+    </select>
+
+    <!--根据地区查找id-->
+    <select id="findIdsByPlace" resultMap="StringMap2" parameterType="String">
+        SELECT id FROM t_hospital WHERE place=#{_param}
     </select>
 
 </mapper>

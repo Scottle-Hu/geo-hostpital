@@ -1,16 +1,12 @@
 package com.charles.geo.service.rank.impl;
 
-import com.charles.geo.model.Colleage;
-import com.charles.geo.model.Hospital;
-import com.charles.geo.model.Paper;
-import com.charles.geo.model.QueryRequest;
+import com.charles.geo.mapper.DiseaseMapper;
+import com.charles.geo.model.*;
 import com.charles.geo.service.rank.IRankService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author huqj
@@ -19,9 +15,18 @@ import java.util.Map;
 @Service("rankServiceImpl")
 public class RankServiceImpl implements IRankService {
 
-    public List<Hospital> rankHospital(List<Hospital> hospitals, QueryRequest request) {
+    @Autowired
+    private DiseaseMapper diseaseMapper;
+
+    public List<Hospital> rankHospital(List<Hospital> hospitals, final QueryRequest request) {
         Collections.sort(hospitals, new Comparator<Hospital>() {
             public int compare(Hospital o1, Hospital o2) {
+                if (o1 == null) {
+                    return 1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
                 //比较挫的比较方法，先应付一下
                 int s1 = 0;
                 int s2 = 0;
@@ -61,6 +66,32 @@ public class RankServiceImpl implements IRankService {
                 if (v2.contains("特等")) {
                     s2 += 10;
                 }
+                //根据科室计算得分
+//                List<Disease> diseaseList = request.getDiseaseList();
+//                Set<String> departList = new HashSet<String>();
+//                for (Disease d : diseaseList) {
+//                    List<Disease> departs = diseaseMapper.findByName(d.getName());
+//                    for (Disease k : departs) {
+//                        String keshi = k.getDepart();
+//                        if (!departList.contains(keshi)) {
+//                            departList.add(keshi);
+//                        }
+//                    }
+//                }
+//                if (o1.getExpertList() != null) {
+//                    for (Expert expert : o1.getExpertList()) {
+//                        if (departList.contains(expert.getDepartment())) {
+//                            s1 += 10;
+//                        }
+//                    }
+//                }
+//                if (o2.getExpertList() != null) {
+//                    for (Expert expert : o2.getExpertList()) {
+//                        if (departList.contains(expert.getDepartment())) {
+//                            s2 += 10;
+//                        }
+//                    }
+//                }
                 return s2 - s1;
             }
         });

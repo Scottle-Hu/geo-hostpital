@@ -1,10 +1,14 @@
 package com.charles.geo.controller;
 
+import com.charles.geo.model.ErrorResponse;
 import com.charles.geo.model.InformationResponse;
 import com.charles.geo.model.QueryRequest;
 import com.charles.geo.service.process.IMainQueryService;
+import com.charles.geo.utils.IQueryRequestFactory;
 import com.charles.geo.utils.QueryRequestFactory;
 //import net.sf.json.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
@@ -34,31 +39,59 @@ public class APIController {
     private Logger LOGGER = Logger.getLogger(APIController.class);
 
     @Autowired
-    private QueryRequestFactory queryRequestFactory;
+    private IQueryRequestFactory queryRequestFactory;
 
     @Autowired
     private IMainQueryService mainQueryService;
 
-    @RequestMapping(value = "/main", method = RequestMethod.GET)
-    public @ResponseBody
-    Object mainApi(@RequestParam("text") String text,
-                   HttpServletRequest request,
-                   HttpServletResponse response) {
+    @RequestMapping(value = "/main", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public void mainApi(@RequestParam("text") String text,
+                        HttpServletRequest request,
+                        HttpServletResponse response) {
+        OutputStream out = null;
         InformationResponse informationResponse = new InformationResponse();
         try {
+            long start = System.currentTimeMillis();
+            out = response.getOutputStream();
+            request.setCharacterEncoding("utf-8");
+            response.setHeader("Content-type", "text/html;charset=UTF-8");
+            //text = new String(text.getBytes("iso8859-1"), "utf-8");
             QueryRequest queryRequest = queryRequestFactory.createQuery(text, null, null);
             informationResponse = mainQueryService.handler(queryRequest);
+            long end = System.currentTimeMillis();
+            informationResponse.setResponseTime((end - start) / 1000 + "秒");
+            ObjectMapper map = new ObjectMapper();
+            String res = map.writeValueAsString(informationResponse);
+            out.write(res.getBytes("utf-8"));
+            out.flush();
+            out.close();
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("调用api出现未知问题");
+            //返回错误响应
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setMessage("推荐出错，详见异常信息");
+            errorResponse.setE(e);
+            ObjectMapper map = new ObjectMapper();
+            String res = null;
+            try {
+                res = map.writeValueAsString(errorResponse);
+                out.write(res.getBytes("utf-8"));
+                out.flush();
+                out.close();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+
+
         }
-        return informationResponse;
     }
 
     //静态页面
-    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    @RequestMapping(value = "/index", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String index() {
         return "index";
     }
+
 
 }

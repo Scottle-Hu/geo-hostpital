@@ -1,5 +1,6 @@
 package com.charles.geo.mapper;
 
+import com.charles.geo.model.Alias;
 import com.charles.geo.model.PointPlace;
 import com.charles.geo.model.Region;
 
@@ -36,4 +37,6 @@ public interface PlaceMapper {
      * @return
      */
     List<PointPlace> queryPointPlaceByName(String name);
+
+    List<Alias> findAllAliasNameAndId();
 }

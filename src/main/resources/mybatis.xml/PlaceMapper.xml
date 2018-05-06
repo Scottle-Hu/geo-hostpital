@@ -29,6 +29,12 @@
         <result column="place_id" property="placeId" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap id="AliasResult" type="Alias">
+        <result column="place_id" property="regionId" jdbcType="VARCHAR"/>
+        <result column="alias" property="alias" jdbcType="VARCHAR"/>
+        <result column="id" property="id" jdbcType="VARCHAR"/>
+    </resultMap>
+
     <!--根据id查询行政区划-->
     <select id="findRegionById" resultMap="RegionMap" parameterType="java.lang.String">
       SELECT * FROM t_region WHERE id=#{_param}
@@ -62,6 +68,11 @@
     <!--queryPointPlaceByName-->
     <select id="queryPointPlaceByName" parameterType="String" resultMap="PointPlaceMap">
         SELECT * FROM t_place WHERE (`type` is null OR `type`='') AND `name` LIKE #{_param}
+    </select>
+
+    <!--findAllAliasNameAndId-->
+    <select id="findAllAliasNameAndId" resultMap="AliasResult">
+        SELECT  alias , place_id FROM t_alias
     </select>
 
 </mapper>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,30 @@ public class HospitalMapperTest {
         List<Hospital> hospitals = hospitalMapper.queryByAlias("协和医院");
         for (Hospital h : hospitals) {
             System.out.println(h);
+        }
+    }
+
+    @Test
+    public void test04() {
+        List<String> ids = new ArrayList<String>();
+        ids.add("1");
+        ids.add("3");
+        ids.add("14");
+        ids.add("10");
+        long start = System.currentTimeMillis();
+        List<Hospital> byIds = hospitalMapper.findByIds(ids);
+        System.out.println("耗时:" + (System.currentTimeMillis() - start));
+        System.out.println(byIds);
+    }
+
+    @Test
+    public void test05() {
+        List<String> places = hospitalMapper.findAllPlace();
+        int index = 1;
+        for (String p : places) {
+            System.out.println(index++);
+            System.out.println(p);
+            hospitalMapper.findIdsByPlace(p);
         }
     }
 }
