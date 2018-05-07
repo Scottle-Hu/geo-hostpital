@@ -85,6 +85,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             List<String> ids = hospitalMapper.findIdsByPlace(p);
             hospitalPlace2Id.put(p, ids);
         }
+        DBUtil.close();
         System.out.println("==========读取医院信息到内存==========");
     }
 
@@ -96,6 +97,10 @@ public class MainQueryServiceImpl implements IMainQueryService {
         InformationResponse response = new InformationResponse();
         //获取推荐的医疗机构
         List<Hospital> hospitals = getHospitals(request);
+        //填充专家
+        for (Hospital hospital : hospitals) {
+            hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+        }
         //获取推荐的大学及研究信息
         List<Colleage> colleages = getColleages(request);
         //封装信息
@@ -201,6 +206,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             level++;
         }
+        DBUtil.close();
         System.out.println("结束扩充医院:" + System.currentTimeMillis());
         hospitalList.addAll(hospitalSet);
         //不知怎么的，set没法去重，手动再次去重
@@ -327,12 +333,13 @@ public class MainQueryServiceImpl implements IMainQueryService {
         Connection con = DBUtil.getConnection();
         try {
             Statement sta = con.createStatement();
+            Statement sta2 = con.createStatement();
             String sql = "select * from t_hospital where id in (";
             for (String id : ids) {
                 sql += id + ",";
             }
             sql = sql.substring(0, sql.length() - 1) + ")";
-            System.out.println(sql);
+            //System.out.println(sql);
             ResultSet resultSet = sta.executeQuery(sql);
             List<Hospital> hospitals = new ArrayList<Hospital>();
             while (resultSet.next()) {
@@ -348,8 +355,11 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 hospital.setPlace(resultSet.getString("place"));
                 hospital.setQuality(resultSet.getString("quality"));
                 hospital.setUrl(resultSet.getString("url"));
+                //hospital.setExpertList(queryExpertByHospital(hospital.getId()));
                 hospitals.add(hospital);
             }
+            resultSet.close();
+            sta.close();
             return hospitals;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -364,9 +374,10 @@ public class MainQueryServiceImpl implements IMainQueryService {
         Connection con = DBUtil.getConnection();
         try {
             Statement sta = con.createStatement();
+            Statement sta2 = con.createStatement();
             String sql = "select * from t_hospital where longitude<" + map.get("longitudeMax") + " and longitude>"
                     + map.get("longitudeMin") + " and latitude<" + map.get("latitudeMax") + " and latitude>" + map.get("latitudeMin");
-            System.out.println(sql);
+            //System.out.println(sql);
             ResultSet resultSet = sta.executeQuery(sql);
             List<Hospital> hospitals = new ArrayList<Hospital>();
             while (resultSet.next()) {
@@ -382,10 +393,43 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 hospital.setPlace(resultSet.getString("place"));
                 hospital.setQuality(resultSet.getString("quality"));
                 hospital.setUrl(resultSet.getString("url"));
+                //hospital.setExpertList(queryExpertByHospital(hospital.getId()));
                 hospitals.add(hospital);
             }
+            resultSet.close();
+            sta.close();
             return hospitals;
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<Expert> queryExpertByHospital(String id) {
+        if (id == null) {
+            return Collections.emptyList();
+        }
+        try {
+            Connection con = DBUtil.getConnection();
+            Statement sta2 = con.createStatement();
+            String sql = "select * from t_expert where hospital_id=" + id;
+            ResultSet resultSet2 = sta2.executeQuery(sql);
+            List<Expert> experts = new ArrayList<Expert>();
+            while (resultSet2.next()) {
+                Expert expert = new Expert();
+                expert.setId(resultSet2.getString("id"));
+                expert.setDepartment(resultSet2.getString("department"));
+                expert.setLevel(resultSet2.getString("level"));
+                expert.setMajor(resultSet2.getString("major"));
+                expert.setName(resultSet2.getString("name"));
+                expert.setPhoto(resultSet2.getString("photo"));
+                expert.setUrl(resultSet2.getString("url"));
+                experts.add(expert);
+            }
+            resultSet2.close();
+            sta2.close();
+            return experts;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return Collections.emptyList();

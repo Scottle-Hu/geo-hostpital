@@ -13,6 +13,9 @@ public class StringUtil {
      * @return
      */
     public static String clearStringFromWeb(String str) {
+        if (str == null) {
+            return "";
+        }
         //去除标签
         int start = str.indexOf("<");
         int end = str.indexOf(">", start);
