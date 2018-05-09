@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 返回的推荐数据封装
  *
- * @author Cahrles
+ * @author Charles
  * @since 1.0
  */
 public class InformationResponse {

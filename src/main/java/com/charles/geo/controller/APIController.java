@@ -33,65 +33,67 @@ import java.io.OutputStream;
 @RequestMapping("/api")
 public class APIController {
 
-    /**
-     * 日志记录器
-     */
-    private Logger LOGGER = Logger.getLogger(APIController.class);
+	/**
+	 * 日志记录器
+	 */
+	private Logger LOGGER = Logger.getLogger(APIController.class);
 
-    @Autowired
-    private IQueryRequestFactory queryRequestFactory;
+	@Autowired
+	private IQueryRequestFactory queryRequestFactory;
 
-    @Autowired
-    private IMainQueryService mainQueryService;
+	@Autowired
+	private IMainQueryService mainQueryService;
 
-    @RequestMapping(value = "/main", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    public void mainApi(@RequestParam("text") String text,
-                        HttpServletRequest request,
-                        HttpServletResponse response) {
-        OutputStream out = null;
-        InformationResponse informationResponse = new InformationResponse();
-        try {
-            long start = System.currentTimeMillis();
-            out = response.getOutputStream();
-            request.setCharacterEncoding("utf-8");
-            response.setHeader("Content-type", "text/html;charset=UTF-8");
-            //text = new String(text.getBytes("iso8859-1"), "utf-8");
-            QueryRequest queryRequest = queryRequestFactory.createQuery(text, null, null);
-            informationResponse = mainQueryService.handler(queryRequest);
-            long end = System.currentTimeMillis();
-            informationResponse.setResponseTime((end - start) / 1000 + "秒");
-            ObjectMapper map = new ObjectMapper();
-            String res = map.writeValueAsString(informationResponse);
-            out.write(res.getBytes("utf-8"));
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("调用api出现未知问题");
-            //返回错误响应
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage("推荐出错，详见异常信息");
-            errorResponse.setE(e);
-            ObjectMapper map = new ObjectMapper();
-            String res = null;
-            try {
-                res = map.writeValueAsString(errorResponse);
-                out.write(res.getBytes("utf-8"));
-                out.flush();
-                out.close();
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
+	@RequestMapping(value = "/main", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+	public void mainApi(@RequestParam("text") String text, HttpServletRequest request, HttpServletResponse response) {
+		OutputStream out = null;
+		try {
+			out = response.getOutputStream();
+			request.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			ObjectMapper map = new ObjectMapper();
+			String res = null;
+			if (text == null || text.equals("")) {
+				// 参数为空，返回错误信息
+				ErrorResponse errorResponse = new ErrorResponse();
+				errorResponse.setMessage("text参数不能为空");
+				res = map.writeValueAsString(errorResponse);
+			} else {
+				long start = System.currentTimeMillis();
+				QueryRequest queryRequest = queryRequestFactory.createQuery(text, null, null);
+				InformationResponse informationResponse = mainQueryService.handler(queryRequest);
+				long end = System.currentTimeMillis();
+				informationResponse.setResponseTime((end - start) / 1000 + "秒");
+				res = map.writeValueAsString(informationResponse);
+			}
+			out.write(res.getBytes("utf-8"));
+			out.flush();
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("调用api出现未知问题");
+			// 返回错误响应
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse.setMessage("推荐出错，详见异常信息");
+			errorResponse.setE(e);
+			ObjectMapper map = new ObjectMapper();
+			String res = null;
+			try {
+				res = map.writeValueAsString(errorResponse);
+				out.write(res.getBytes("utf-8"));
+				out.flush();
+				out.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 
+		}
+	}
 
-        }
-    }
-
-    //静态页面
-    @RequestMapping(value = "/index", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String index() {
-        return "index";
-    }
-
+	// 静态页面
+	@RequestMapping(value = "/index", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+	public String index() {
+		return "index";
+	}
 
 }
