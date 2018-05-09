@@ -18,8 +18,8 @@ public class DBUtil {
         }
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db_geo?characterEncoding=utf8&autoReconnect=true"
-                    , "root", "123456");
+            connection = DriverManager.getConnection("jdbc:mysql://122.114.206.52:3306/db_geo?characterEncoding=utf8&autoReconnect=true"
+                    , "ssgxhn$$$2018", "123456");
             return connection;
         } catch (Exception e) {
             e.printStackTrace();
