@@ -19,6 +19,8 @@
     <context:component-scan base-package="com.charles.geo.utils"/>
 
 
+    <!--<context:property-placeholder location="classpath:jdbc.properties" ignore-unresolvable="true"/>-->
+
     <!-- 使用druid引入配置数据源 -->
     <import resource="druid.xml"/>
 
