@@ -17,9 +17,13 @@ public class ValueAnnotationTest {
     @Value("${jdbc.driver}")
     private String driver;
 
+    @Value("${init.num}")
+    private int initNum;
+
     @Test
     public void testValue() {
         System.out.println(driver);
+        System.out.println(initNum);
     }
 
 }

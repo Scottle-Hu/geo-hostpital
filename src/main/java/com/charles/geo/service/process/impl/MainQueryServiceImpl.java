@@ -209,7 +209,6 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             level++;
         }
-        dbUtil.close();
         System.out.println("结束扩充医院:" + System.currentTimeMillis());
         hospitalList.addAll(hospitalSet);
         // 不知怎么的，set没法去重，手动再次去重
@@ -363,6 +362,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             resultSet.close();
             sta.close();
+            dbUtil.releaseConnection(con);  //归还连接给连接池
             return hospitals;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -402,6 +402,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             resultSet.close();
             sta.close();
+            dbUtil.releaseConnection(con);  //归还连接给连接池
             return hospitals;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -432,6 +433,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
             resultSet2.close();
             sta2.close();
+            dbUtil.releaseConnection(con);  //归还连接给连接池
             return experts;
         } catch (Exception e) {
             e.printStackTrace();
