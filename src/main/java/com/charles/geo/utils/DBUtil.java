@@ -41,12 +41,12 @@ public class DBUtil {
     /**
      * 定时强制归还忘记归还的连接
      */
-    private final long forceReturnTime = 60 * 60 * 1000;
+    private final long forceReturnTime = 20 * 60 * 1000;
 
     /**
      * 定时刷新数据库连接
      */
-    private final long refreshInterval = 10 * 60 * 60 * 1000;
+    private final long refreshInterval = 2 * 60 * 60 * 1000;
 
     /**
      * 初始化连接池连接数目
@@ -78,7 +78,9 @@ public class DBUtil {
     @Value("${test.table}")
     private String testTableName;
 
-    //注入数据库连接属性
+    /**
+     * 注入数据库连接属性
+     */
     @Value("${jdbc.driver}")
     private String driver;
 
@@ -275,7 +277,8 @@ public class DBUtil {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         int num = 0;
         for (MyConnection mc : connection) {
-            if (!mc.isBusy()) {  //只更新没有占用的连接
+            //只更新没有占用并且不可用的连接
+            if (!mc.isBusy() && !isAvailable(mc.getConnection())) {
                 try {
                     mc.getConnection().close(); //注意释放之前的连接，否则数据库那边会爆
                 } catch (SQLException e) {
@@ -317,6 +320,7 @@ public class DBUtil {
      * 强制归还超时未归还的连接
      */
     private void forceRelease() {
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         for (MyConnection mc : connection) {
             if (mc.isBusy() && (System.currentTimeMillis() - mc.getStartTm()) > forceReturnTime) {
                 mc.setBusy(false);
