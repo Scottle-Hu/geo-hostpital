@@ -101,9 +101,11 @@ public class MainQueryServiceImpl implements IMainQueryService {
         // 获取推荐的医疗机构
         List<Hospital> hospitals = getHospitals(request);
         // 填充专家
+        System.out.println("开始填充专家");
         for (Hospital hospital : hospitals) {
             hospital.setExpertList(queryExpertByHospital(hospital.getId()));
         }
+        System.out.println("结束填充专家");
         // 获取推荐的大学及研究信息
         List<Colleage> colleages = getColleages(request);
         // 封装信息

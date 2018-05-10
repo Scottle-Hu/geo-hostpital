@@ -129,7 +129,7 @@ public class DBUtil {
         }, forceReturnTime, forceReturnTime);
     }
 
-    public synchronized Connection getConnection() {
+    public Connection getConnection() {
         Connection con = getFreeConnection();
         //已经达到最大连接数量并且没有空闲连接,则尝试等待然后重新获取
         if (con == null) {
