@@ -47,7 +47,7 @@ public class APIController {
 	@RequestMapping(value = "/main", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
 	public void mainApi(@RequestParam("text") String text, HttpServletRequest request, HttpServletResponse response) {
 		OutputStream out = null;
-		try {
+		try {  //测试git
 			out = response.getOutputStream();
 			request.setCharacterEncoding("utf-8");
 			response.setHeader("Content-type", "text/html;charset=UTF-8");
