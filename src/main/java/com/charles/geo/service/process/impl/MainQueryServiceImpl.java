@@ -82,13 +82,13 @@ public class MainQueryServiceImpl implements IMainQueryService {
     @PostConstruct
     public void init() {
         System.out.println("==========读取医院信息到内存==========");
-        List<String> placeList = hospitalMapper.findAllPlace();
-        int index = 1;
-        for (String p : placeList) {
-            System.out.println(index++);
-            List<String> ids = hospitalMapper.findIdsByPlace(p);
-            hospitalPlace2Id.put(p, ids);
-        }
+//        List<String> placeList = hospitalMapper.findAllPlace();
+//        int index = 1;
+//        for (String p : placeList) {
+//            System.out.println(index++);
+//            List<String> ids = hospitalMapper.findIdsByPlace(p);
+//            hospitalPlace2Id.put(p, ids);
+//        }
         System.out.println("==========读取医院信息到内存==========");
     }
 

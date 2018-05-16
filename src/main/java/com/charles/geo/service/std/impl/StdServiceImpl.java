@@ -52,15 +52,14 @@ public class StdServiceImpl implements IStdService {
     @PostConstruct
     public void init() {
         System.out.println("========开始读取别名数据到内存中=======");
-        List<Alias> allAliasNameAndId = placeMapper.findAllAliasNameAndId();
-        for (Alias alias : allAliasNameAndId) {
-            String a = alias.getAlias();
-            if (alias2Id.get(a) == null) {
-                alias2Id.put(a, new ArrayList<String>());
-            }
-            alias2Id.get(a).add(alias.getRegionId());
-        }
-
+//        List<Alias> allAliasNameAndId = placeMapper.findAllAliasNameAndId();
+//        for (Alias alias : allAliasNameAndId) {
+//            String a = alias.getAlias();
+//            if (alias2Id.get(a) == null) {
+//                alias2Id.put(a, new ArrayList<String>());
+//            }
+//            alias2Id.get(a).add(alias.getRegionId());
+//        }
         System.out.println("========结束读取别名数据到内存中=======");
     }
 

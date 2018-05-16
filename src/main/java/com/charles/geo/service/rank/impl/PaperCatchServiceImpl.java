@@ -82,7 +82,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
     public List<Paper> getPaper(String colleage, String disease) {
         String key = colleage + SEG + disease;
         if (paperCache.get(key) != null) {
-            System.out.println("从缓存中获取论文数据：" + key);
+            //System.out.println("从缓存中获取论文数据：" + key);
             return paperCache.get(key);
         }
         return catchPaper(colleage, disease);
@@ -194,7 +194,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                             .replace("</font>", "");
                     title = StringUtil.clearStringFromWeb(title);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setTitle(title);
                 //System.out.println("标题：" + title);
@@ -206,7 +206,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                     //处理作者列表
                     authors = StringUtil.clearStringFromWeb(parseAuthor(authorList));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setAuthor(authors);
                 //System.out.println("作者：" + authors);
@@ -218,7 +218,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                     source = src.substring(sourceStart, sourceEnd);
                     source = StringUtil.clearStringFromWeb(source);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setSource(source);
                 //System.out.println("来源：" + source);
@@ -230,7 +230,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                     time = src.substring(timeStart, timeEnd).trim();
                     time = StringUtil.clearStringFromWeb(time);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setPublishTime(time);
                 //System.out.println("时间：" + time);
@@ -246,7 +246,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                         refNum = Integer.parseInt(ref);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setReference(refNum);
                 //System.out.println("被引：" + refNum);
@@ -262,7 +262,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
                         dnum2 = Integer.parseInt(dnum);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 paper.setDnum(dnum2);
                 //System.out.println("下载：" + dnum2);

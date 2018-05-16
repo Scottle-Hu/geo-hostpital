@@ -10,6 +10,8 @@ import java.util.Date;
  */
 public class Paper {
 
+    private String id;
+
     private String title;
 
     private String publishTime;
@@ -35,6 +37,14 @@ public class Paper {
      * 知网页面url
      */
     private String url;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;

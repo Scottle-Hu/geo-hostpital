@@ -77,8 +77,8 @@ public class NERServiceImplTest {
         System.out.println("疾病实体：" + diseaseNames);
     }
 
-    @Test
-    public void test03() {
+
+    public voi @Testd test03() {
         String text = "昨天晚上十二点，在湖北省武汉市武汉大学梅园四舍，张学思突然癫痫发作，吃了一点药后感觉好多了，" +
                 "最后才缓和下来，李三珍一直陪在他身边，后来还带他去了协和医院，协和医院就在华科的旁边，华科医学院对于" +
                 "肺癌的研究很拔尖";

@@ -13,6 +13,10 @@
         <result property="latitude" column="latitude"/>
     </resultMap>
 
+    <resultMap id="StringMap" type="String">
+        <result column="name" property="name"/>
+    </resultMap>
+
 
     <!--根据经纬度范围查询大学-->
     <select id="queryByRange" resultMap="ColleageMap" parameterType="Map">
@@ -34,6 +38,11 @@
     <select id="queryByAliases" parameterType="String" resultMap="ColleageMap">
       SELECT u.id as id,u.name as `name`,u.longitude as longitude,u.latitude as latitude
       FROM t_university u,t_alias2 as a WHERE u.id = a.university_id AND a.alias=#{_param}
+    </select>
+
+    <!--获取所有大学论文-->
+    <select id="getAllName" resultMap="ColleageMap">
+        SELECT `name`,id FROM t_university
     </select>
 
 </mapper>
