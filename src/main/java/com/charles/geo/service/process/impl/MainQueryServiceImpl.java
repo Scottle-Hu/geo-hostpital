@@ -1,14 +1,17 @@
 package com.charles.geo.service.process.impl;
 
+import com.charles.geo.mapper.DiseaseMapper;
 import com.charles.geo.mapper.HospitalMapper;
 import com.charles.geo.mapper.PlaceMapper;
 import com.charles.geo.mapper.UniversityMapper;
 import com.charles.geo.model.*;
 import com.charles.geo.service.process.IMainQueryService;
 import com.charles.geo.service.rank.IPaperCatchService;
+import com.charles.geo.service.rank.IPaperOfferService;
 import com.charles.geo.service.rank.IRankService;
 import com.charles.geo.utils.Constant;
 import com.charles.geo.utils.DBUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +62,18 @@ public class MainQueryServiceImpl implements IMainQueryService {
      */
     private double geoRank = 0.036; // 2KM
 
+    private String SEG = "|";
+
+    /**
+     * 15天清理过期缓存
+     */
+    private long intervalTime = 15 * 24 * 60 * 60 * 1000;
+
+    /**
+     * 存储大学-疾病的论文缓存，存储的key为大学|疾病
+     */
+    private Map<String, List<Paper>> paperCache = new HashMap<String, List<Paper>>();
+
     @Autowired
     private IRankService rankService;
 
@@ -72,7 +87,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     private UniversityMapper universityMapper;
 
     @Autowired
-    private IPaperCatchService paperCatchService;
+    private IPaperOfferService paperOfferService;
 
     @Autowired
     private DBUtil dbUtil;
@@ -82,14 +97,28 @@ public class MainQueryServiceImpl implements IMainQueryService {
     @PostConstruct
     public void init() {
         System.out.println("==========读取医院信息到内存==========");
-        List<String> placeList = hospitalMapper.findAllPlace();
-        int index = 1;
-        for (String p : placeList) {
-            System.out.println(index++);
-            List<String> ids = hospitalMapper.findIdsByPlace(p);
-            hospitalPlace2Id.put(p, ids);
-        }
+//        List<String> placeList = hospitalMapper.findAllPlace();
+//        int index = 1;
+//        for (String p : placeList) {
+//            index++;
+//            if (index % 10 == 0)
+//                System.out.println(index);
+//            List<String> ids = hospitalMapper.findIdsByPlace(p);
+//            hospitalPlace2Id.put(p, ids);
+//        }
         System.out.println("==========读取医院信息到内存==========");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                reload();
+            }
+        }, 0, intervalTime);
+    }
+
+    private void reload() {
+        //TODO 只清理过期缓存即可，需要修改缓存结构
+        paperCache.clear();
+        LOGGER.info("清理过期论文缓存结束");
     }
 
     /**
@@ -100,10 +129,10 @@ public class MainQueryServiceImpl implements IMainQueryService {
         InformationResponse response = new InformationResponse();
         // 获取推荐的医疗机构
         List<Hospital> hospitals = getHospitals(request);
-        // 填充专家
-        for (Hospital hospital : hospitals) {
-            hospital.setExpertList(queryExpertByHospital(hospital.getId()));
-        }
+//        // 填充专家
+//        for (Hospital hospital : hospitals) {
+//            hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+//        }
         // 获取推荐的大学及研究信息
         List<Colleage> colleages = getColleages(request);
         // 封装信息
@@ -245,25 +274,6 @@ public class MainQueryServiceImpl implements IMainQueryService {
         List<Region> regionList = request.getRegionList(); // 行政区划集合
         List<GeoPoint> pointList = request.getPointList(); // 经纬度点集合
         List<Disease> diseaseList = request.getDiseaseList();
-        // 获取行政区划下面的所有大学
-        // for (Region region : regionList) {
-        // if (region.getType().equals(Constant.COUNTY)) {
-        // colleageSet.addAll(universityMapper.queryByRegion(region.getId()));
-        // } else if (region.getType().equals(Constant.CITY)) {
-        // List<Region> sons = placeMapper.findRegionByFather(region.getId());
-        // for (Region r : sons) {
-        // colleageSet.addAll(universityMapper.queryByRegion(r.getId()));
-        // }
-        // } else {
-        // List<Region> sons = placeMapper.findRegionByFather(region.getId());
-        // for (Region r : sons) {
-        // List<Region> sonList = placeMapper.findRegionByFather(r.getId());
-        // for (Region s : sonList) {
-        // colleageSet.addAll(universityMapper.queryByRegion(s.getId()));
-        // }
-        // }
-        // }
-        // }
         // 目前大学父级是市级别的，提名方法如下：
         for (Region region : regionList) {
             if (region.getType().equals(Constant.COUNTY)) {
@@ -300,12 +310,13 @@ public class MainQueryServiceImpl implements IMainQueryService {
         for (Colleage colleage : colleageSet) {
             Map<String, List<Paper>> paperMap = new HashMap<String, List<Paper>>();
             for (String d : ds) {
-                List<Paper> paper = paperCatchService.getPaper(colleage.getName(), d);
+//                List<Paper> paper = paperOfferService.getPaperByUniversityAndDisease(colleage.getName(), d);
+                List<Paper> paper = queryPaperByUniversityAndDisease(colleage.getName(), d);
                 paperMap.put(d, paper);
             }
             colleage.setPaperList(paperMap);
         }
-        System.out.println("结束抓取论文:" + System.currentTimeMillis());
+        System.out.println("结束查询论文:" + System.currentTimeMillis());
         colleageList.addAll(colleageSet);
         // 不知怎么的，set没法去重，手动再次去重
         Set<String> names = new HashSet<String>();
@@ -397,7 +408,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 hospital.setPlace(resultSet.getString("place"));
                 hospital.setQuality(resultSet.getString("quality"));
                 hospital.setUrl(resultSet.getString("url"));
-                // hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+                hospital.setExpertList(queryExpertByHospital(hospital.getId()));
                 hospitals.add(hospital);
             }
             resultSet.close();
@@ -439,5 +450,85 @@ public class MainQueryServiceImpl implements IMainQueryService {
             e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    private List<Paper> queryPaperByUniversityAndDisease(String university, String disease) {
+        String key = university + SEG + disease;
+        List<Paper> p = paperCache.get(key);
+        if (p != null) {
+            LOGGER.info("从缓存中获取数据：" + key);
+            return p;
+        }
+        List<Paper> papers = getPaperByIds(getIdsByUniversityAndDisease(university, disease));
+        if (papers.size() != 0) {
+            paperCache.put(key, papers);
+            LOGGER.info("存入缓存：" + key);
+        }
+        return papers;
+    }
+
+    private List<String> getIdsByUniversityAndDisease(String university, String disease) {
+        if (StringUtils.isBlank(university) || StringUtils.isBlank(disease)) {
+            return Collections.emptyList();
+        }
+        try {
+            Connection con = dbUtil.getConnection();
+            Statement sta2 = con.createStatement();
+            String sql = "select paper_id from t_university_disease_paper where university=\""
+                    + university + "\" and disease=\"" + disease + "\"";
+//            System.out.println(sql);
+            ResultSet resultSet2 = sta2.executeQuery(sql);
+            List<String> ids = new ArrayList<String>();
+            while (resultSet2.next()) {
+                ids.add(resultSet2.getString("paper_id"));
+            }
+            resultSet2.close();
+            sta2.close();
+            dbUtil.releaseConnection(con);  //归还连接给连接池
+//            System.out.println(ids);
+            return ids;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private List<Paper> getPaperByIds(List<String> ids) {
+        if (ids == null || ids.size() == 0) {
+            return Collections.emptyList();
+        }
+        StringBuilder idStr = new StringBuilder("(");
+        for (String id : ids) {
+            idStr.append("\"" + id + "\",");
+        }
+        String s = idStr.substring(0, idStr.length() - 1) + ")";
+        String sql = "select * from t_paper where id in " + s;
+//        System.out.println(sql);
+        List<Paper> papers = new ArrayList<Paper>();
+        try {
+            Connection con = dbUtil.getConnection();
+            Statement sta2 = con.createStatement();
+            ResultSet resultSet2 = sta2.executeQuery(sql);
+            while (resultSet2.next()) {
+                Paper p = new Paper();
+                p.setId(resultSet2.getString("id"));
+                p.setAuthor(resultSet2.getString("author"));
+                p.setDnum(resultSet2.getInt("dnum"));
+                p.setPublishTime(resultSet2.getString("publish_time"));
+                p.setReference(resultSet2.getInt("reference"));
+                p.setSource(resultSet2.getString("source"));
+                p.setTitle(resultSet2.getString("title"));
+                p.setUrl(resultSet2.getString("url"));
+                papers.add(p);
+            }
+            resultSet2.close();
+            sta2.close();
+            dbUtil.releaseConnection(con);
+//            System.out.println(papers);
+            return papers;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

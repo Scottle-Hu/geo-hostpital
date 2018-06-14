@@ -26,6 +26,11 @@ public class QueryRequest {
      */
     private String currentIP;
 
+    /**
+     * 用户唯一id
+     */
+    private String uid;
+
     public List<GeoPoint> getPointList() {
         return pointList;
     }
@@ -64,5 +69,13 @@ public class QueryRequest {
 
     public void setCurrentIP(String currentIP) {
         this.currentIP = currentIP;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

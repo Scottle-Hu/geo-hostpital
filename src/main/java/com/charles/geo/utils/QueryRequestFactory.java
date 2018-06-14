@@ -38,7 +38,7 @@ public class QueryRequestFactory implements IQueryRequestFactory {
      * @param text 文本
      * @return
      */
-    public QueryRequest createQuery(String text, String ip, GeoPoint curPoint) {
+    public QueryRequest createQuery(String text, String ip, GeoPoint curPoint, String uid) {
         QueryRequest request = new QueryRequest();
         List<Region> regionList = new ArrayList<Region>();
         List<Disease> diseaseList = new ArrayList<Disease>();
@@ -53,6 +53,7 @@ public class QueryRequestFactory implements IQueryRequestFactory {
         request.setRegionList(regionList);
         request.setCurrentIP(ip);
         request.setCurrentPoint(curPoint);
+        request.setUid(uid);
         return request;
     }
 

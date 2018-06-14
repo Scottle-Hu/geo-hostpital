@@ -21,10 +21,17 @@ public interface PaperMapper {
     /**
      * 根据学校名称和疾病名称获取论文
      *
+     * @param id
+     * @return
+     */
+    Paper findByPaperId(String id);
+
+    /**
+     * 根据学校名称和疾病名称查询论文id集合
      * @param map
      * @return
      */
-    List<Paper> findByColleage(Map<String, String> map);
+    List<String> findPaperId(Map<String, String> map);
 
     /**
      * 根据论文名称和作者信息判断某篇论文是否存在

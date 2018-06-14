@@ -17,15 +17,25 @@
         <result property="url" column="url"/>
     </resultMap>
 
+    <resultMap id="StringMap" type="String">
+        <result column="paper_id" property="id"/>
+    </resultMap>
+
     <!--插入一条论文记录-->
     <insert id="insertOne" parameterType="Paper">
         INSERT INTO t_paper VALUES
         (#{id},#{title},#{publishTime},#{author},#{dnum},#{source},#{reference},#{url})
     </insert>
 
-    <!--根据学校名称以及疾病名称查询论文-->
-    <select id="findByColleage" parameterType="Map" resultMap="PaperMap">
-        SELECT * FROM t_paper WHERE university=#{university} AND disease=#{disease}
+    <!--根据id查询论文-->
+    <select id="findByPaperId" parameterType="String" resultType="Paper">
+        SELECT * FROM t_paper WHERE id=#{_param}
+    </select>
+
+    <!--根据学校和疾病查询论文id列表-->
+    <select id="findPaperId" resultMap="StringMap" parameterType="Map">
+        SELECT paper_id FROM t_university_disease_paper
+        WHERE university=#{university} AND disease=#{disease}
     </select>
 
     <!--根据论文的标题和作者判断论文是否已经存在，避免重复存储-->

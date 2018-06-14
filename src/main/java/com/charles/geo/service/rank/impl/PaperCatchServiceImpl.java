@@ -34,13 +34,13 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
      */
     private Logger LOGGER = Logger.getLogger(PaperCatchServiceImpl.class);
 
-    private String url1 = "http://kns.cnki.net/kns/request/SearchHandler.ashx?action=&NaviCode=*&ua=1.21&PageName=ASP.brief_result_aspx&DbPrefix=SCDB&DbCatalog=%E4%B8%AD%E5%9B%BD%E5%AD%A6%E6%9C%AF%E6%96%87%E7%8C%AE%E7%BD%91%E7%BB%9C%E5%87%BA%E7%89%88%E6%80%BB%E5%BA%93&ConfigFile=SCDB.xml&db_opt=CJFQ%2CCJRF%2CCDFD%2CCMFD%2CCPFD%2CIPFD%2CCCND%2CCCJD&txt_1_sel=SU&txt_1_value1=(?)&txt_1_relation=%23CNKI_AND&txt_1_special1=%25&au_1_sel=AU&au_1_sel2=AF&au_1_value2=(*)&au_1_special1=%3D&au_1_special2=%25&his=0&_=";
+    private String url1 = "http://103.227.81.43/kns/request/SearchHandler.ashx?action=&NaviCode=*&ua=1.21&PageName=ASP.brief_result_aspx&DbPrefix=SCDB&DbCatalog=%E4%B8%AD%E5%9B%BD%E5%AD%A6%E6%9C%AF%E6%96%87%E7%8C%AE%E7%BD%91%E7%BB%9C%E5%87%BA%E7%89%88%E6%80%BB%E5%BA%93&ConfigFile=SCDB.xml&db_opt=CJFQ%2CCJRF%2CCDFD%2CCMFD%2CCPFD%2CIPFD%2CCCND%2CCCJD&txt_1_sel=SU&txt_1_value1=(?)&txt_1_relation=%23CNKI_AND&txt_1_special1=%25&au_1_sel=AU&au_1_sel2=AF&au_1_value2=(*)&au_1_special1=%3D&au_1_special2=%25&his=0&_=";
 
-    private String url2 = "http://kns.cnki.net/kns/brief/brief.aspx?pagename=(?)&t=(*)&keyValue=(#)&S=1";
+    private String url2 = "http://103.227.81.43/kns/brief/brief.aspx?pagename=(?)&t=(*)&keyValue=(#)&S=1";
 
     private String sortByRef = "&sorttype=(%E8%A2%AB%E5%BC%95%E9%A2%91%E6%AC%A1%2c%27INTEGER%27)+desc&queryid=157";
 
-    private String prefix = "http://kns.cnki.net";
+    private String prefix = "http://103.227.81.43";
 
     private String SEG = "|";
 
@@ -94,6 +94,7 @@ public class PaperCatchServiceImpl implements IPaperCatchService {
      * @return 论文对象列表
      */
     public List<Paper> catchPaper(String colleage, String disease) {
+        disease = disease.replace(" ", "").trim();
         //System.out.println("检索的大学：" + colleage + ",检索的疾病：" + disease);
         List<Paper> paperList = new ArrayList<Paper>();
         //构造一级请求的url

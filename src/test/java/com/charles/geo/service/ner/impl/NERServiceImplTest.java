@@ -61,9 +61,7 @@ public class NERServiceImplTest {
 
     @Test
     public void test02() {
-        String text = "昨天晚上十二点，在湖北省武汉市武汉大学梅园四舍，张学思突然癫痫发作，吃了一点药后感觉好多了，" +
-                "最后才缓和下来，李三珍一直陪在他身边，后来还带他去了协和医院，协和医院就在华科的旁边，华科医学院对于" +
-                "肺癌的研究很拔尖";
+        String text = "没想到四月的江城还能这么冷，刚来就感冒了";
         List<String> regionNames = new ArrayList<String>();
         List<String> placeNames = new ArrayList<String>();
         List<String> peopleNames = new ArrayList<String>();
@@ -78,10 +76,9 @@ public class NERServiceImplTest {
     }
 
 
-    public voi @Testd test03() {
-        String text = "昨天晚上十二点，在湖北省武汉市武汉大学梅园四舍，张学思突然癫痫发作，吃了一点药后感觉好多了，" +
-                "最后才缓和下来，李三珍一直陪在他身边，后来还带他去了协和医院，协和医院就在华科的旁边，华科医学院对于" +
-                "肺癌的研究很拔尖";
+    @Test
+    public void test03() {
+        String text = "想转院到一个大医院治疗，武汉市第二医院怎么样？";
         List<Region> regionList = new ArrayList<Region>();
         List<GeoPoint> pointList = new ArrayList<GeoPoint>();
         List<Disease> diseaseList = new ArrayList<Disease>();

@@ -52,19 +52,62 @@ public class StdServiceImpl implements IStdService {
     @PostConstruct
     public void init() {
         System.out.println("========开始读取别名数据到内存中=======");
-//        List<Alias> allAliasNameAndId = placeMapper.findAllAliasNameAndId();
-//        for (Alias alias : allAliasNameAndId) {
-//            String a = alias.getAlias();
-//            if (alias2Id.get(a) == null) {
-//                alias2Id.put(a, new ArrayList<String>());
-//            }
-//            alias2Id.get(a).add(alias.getRegionId());
-//        }
+        List<Alias> allAliasNameAndId = placeMapper.findAllAliasNameAndId();
+        for (Alias alias : allAliasNameAndId) {
+            String a = alias.getAlias();
+            if (alias2Id.get(a) == null) {
+                alias2Id.put(a, new ArrayList<String>());
+            }
+            alias2Id.get(a).add(alias.getRegionId());
+        }
         System.out.println("========结束读取别名数据到内存中=======");
     }
 
-    public GeoPoint convertPOI2Point(String place) {
-        return null;
+    public List<GeoPoint> convertPOI2Point(String name) {
+        List<GeoPoint> pointList = new ArrayList<GeoPoint>();
+        //尝试查询大学标准名称
+        Colleage colleage = universityMapper.queryByName(name);
+        if (colleage == null) {
+            colleage = universityMapper.queryByAliases(name).get(0);
+        }
+        if (colleage != null) {
+            GeoPoint geoPoint = new GeoPoint();
+            geoPoint.setLongitude(Double.parseDouble(colleage.getLongitude()));
+            geoPoint.setLatitude(Double.parseDouble(colleage.getLatitude()));
+            pointList.add(geoPoint);
+        }
+        //尝试查询大学简称
+        List<Colleage> colleageList = universityMapper.queryByAliases(name);
+        if (colleageList != null && colleageList.size() > 0) {
+            for (Colleage c : colleageList) {
+                GeoPoint geoPoint = new GeoPoint();
+                geoPoint.setLongitude(Double.parseDouble(c.getLongitude()));
+                geoPoint.setLatitude(Double.parseDouble(c.getLatitude()));
+                pointList.add(geoPoint);
+            }
+        }
+        //尝试查询医院名称
+        List<Hospital> hospitals = hospitalMapper.queryByName(name);
+        if (hospitals != null && hospitals.size() > 0) {
+            for (Hospital h : hospitals) {
+                GeoPoint p = new GeoPoint();
+                p.setLatitude(h.getLatitude());
+                p.setLongitude(h.getLongitude());
+                pointList.add(p);
+            }
+        }
+        //尝试查询医院别名
+        hospitals = hospitalMapper.queryByAlias(name);
+        if (hospitals != null && hospitals.size() > 0) {
+            for (Hospital h : hospitals) {
+                GeoPoint p = new GeoPoint();
+                p.setLatitude(h.getLatitude());
+                p.setLongitude(h.getLongitude());
+                pointList.add(p);
+            }
+        }
+        //getGeoPointByAPI(name, regionList, pointList);
+        return pointList;
     }
 
     public List<Disease> convertMedicine2Disease(String medicine) {
@@ -133,6 +176,18 @@ public class StdServiceImpl implements IStdService {
         for (String name : pointNames) {
             //尝试查询大学标准名称
             Colleage colleage = universityMapper.queryByName(name);
+            if (colleage == null) {
+                List<Colleage> colleages = universityMapper.queryByAliases(name);
+                if (colleages != null && colleages.size() > 0) {
+                    for (Colleage colleage2 : colleages) {
+                        GeoPoint geoPoint = new GeoPoint();
+                        geoPoint.setLongitude(Double.parseDouble(colleage2.getLongitude()));
+                        geoPoint.setLatitude(Double.parseDouble(colleage2.getLatitude()));
+                        pointList.add(geoPoint);
+                    }
+                    continue;
+                }
+            }
             if (colleage != null) {
                 GeoPoint geoPoint = new GeoPoint();
                 geoPoint.setLongitude(Double.parseDouble(colleage.getLongitude()));
@@ -163,16 +218,16 @@ public class StdServiceImpl implements IStdService {
                 continue;
             }
             //尝试查询医院别名
-//            hospitals = hospitalMapper.queryByAlias(name);
-//            if (hospitals != null && hospitals.size() > 0) {
-//                for (Hospital h : hospitals) {
-//                    GeoPoint p = new GeoPoint();
-//                    p.setLatitude(h.getLatitude());
-//                    p.setLongitude(h.getLongitude());
-//                    pointList.add(p);
-//                }
-//                continue;
-//            }
+            hospitals = hospitalMapper.queryByAlias(name);
+            if (hospitals != null && hospitals.size() > 0) {
+                for (Hospital h : hospitals) {
+                    GeoPoint p = new GeoPoint();
+                    p.setLatitude(h.getLatitude());
+                    p.setLongitude(h.getLongitude());
+                    pointList.add(p);
+                }
+                continue;
+            }
             //尝试查询t_place地点数据
 //            List<PointPlace> pointPlaces = placeMapper.queryPointPlaceByName(name);
 //            if (pointPlaces != null && pointPlaces.size() > 0) {

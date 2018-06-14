@@ -93,4 +93,12 @@ public class StdServiceImplTest {
         }
     }
 
+    @Test
+
+    public void test04() {
+        String str = "中南医院";
+        List<GeoPoint> geoPoint = stdService.convertPOI2Point(str);
+        System.out.println(geoPoint);
+    }
+
 }
