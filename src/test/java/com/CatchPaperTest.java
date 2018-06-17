@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.util.*;
@@ -107,11 +108,16 @@ public class CatchPaperTest {
         fr.close();
         List<String> ds = diseaseMapper.getAllName();
         int index = 0;
-        int relationId = 301240;
+        int relationId = 321240;
         for (Colleage university : uns) {
             System.out.println(++index + university.getName());
             for (String disease : ds) {
                 try {
+                    Map<String, String> m = new HashMap<String, String>();
+                    List<String> paperId1 = paperMapper.findPaperId(m);
+                    if (!CollectionUtils.isEmpty(paperId1)) {
+                        continue;
+                    }
                     List<Paper> paper = paperCatchService.getPaper(university.getName(), disease);
                     for (Paper p : paper) {
                         Map<String, String> map = new HashMap<String, String>();

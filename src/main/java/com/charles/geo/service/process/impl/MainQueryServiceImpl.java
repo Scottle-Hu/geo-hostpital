@@ -60,7 +60,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
     /**
      * 按照经纬度查询的时候取附近的经纬度范围
      */
-    private double geoRank = 0.036; // 2KM
+    private double geoRank = 0.005; // 2KM
 
     private String SEG = "|";
 
@@ -97,15 +97,15 @@ public class MainQueryServiceImpl implements IMainQueryService {
     @PostConstruct
     public void init() {
         System.out.println("==========读取医院信息到内存==========");
-//        List<String> placeList = hospitalMapper.findAllPlace();
-//        int index = 1;
-//        for (String p : placeList) {
-//            index++;
-//            if (index % 10 == 0)
-//                System.out.println(index);
-//            List<String> ids = hospitalMapper.findIdsByPlace(p);
-//            hospitalPlace2Id.put(p, ids);
-//        }
+        List<String> placeList = hospitalMapper.findAllPlace();
+        int index = 1;
+        for (String p : placeList) {
+            index++;
+            if (index % 10 == 0)
+                System.out.println(index);
+            List<String> ids = hospitalMapper.findIdsByPlace(p);
+            hospitalPlace2Id.put(p, ids);
+        }
         System.out.println("==========读取医院信息到内存==========");
         new Timer().schedule(new TimerTask() {
             @Override
@@ -129,10 +129,10 @@ public class MainQueryServiceImpl implements IMainQueryService {
         InformationResponse response = new InformationResponse();
         // 获取推荐的医疗机构
         List<Hospital> hospitals = getHospitals(request);
-//        // 填充专家
-//        for (Hospital hospital : hospitals) {
-//            hospital.setExpertList(queryExpertByHospital(hospital.getId()));
-//        }
+        // 填充专家
+        for (Hospital hospital : hospitals) {
+            hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+        }
         // 获取推荐的大学及研究信息
         List<Colleage> colleages = getColleages(request);
         // 封装信息
@@ -183,62 +183,64 @@ public class MainQueryServiceImpl implements IMainQueryService {
             }
         }
         System.out.println("结束行政区题名医院:" + System.currentTimeMillis());
-        // 获取每个经纬度节点附近的医疗机构，取并集
-        for (GeoPoint point : pointList) {
-            double longitude = point.getLongitude();
-            double latitude = point.getLatitude();
-            // 计算选择医院的经纬度范围
-            Map<String, Double> map = new HashMap<String, Double>();
-            map.put("longitudeMin", longitude - geoRank);
-            map.put("longitudeMax", longitude + geoRank);
-            map.put("latitudeMin", latitude - geoRank);
-            map.put("latitudeMax", latitude + geoRank);
-            hospitalSet.addAll(queryHospitalByRange(map));
-        }
-        int level = 1;
-        System.out.println("结束经纬度题名医院:" + System.currentTimeMillis());
-        // 如果医院候选列表过少，将行政区划向上扩张
-        while (hospitalSet.size() < HOS_MIN_RECOMMAND_NUM) {
-            if (level > 2) {
-                LOGGER.error("所提名的推荐医院候选列表元素个数太少,可能是数据原因。");
-                break;
+        if (hospitalSet.size() < HOS_MAX_RECOMMAND_NUM * 2) {
+            // 获取每个经纬度节点附近的医疗机构，取并集
+            for (GeoPoint point : pointList) {
+                double longitude = point.getLongitude();
+                double latitude = point.getLatitude();
+                // 计算选择医院的经纬度范围
+                Map<String, Double> map = new HashMap<String, Double>();
+                map.put("longitudeMin", longitude - geoRank);
+                map.put("longitudeMax", longitude + geoRank);
+                map.put("latitudeMin", latitude - geoRank);
+                map.put("latitudeMax", latitude + geoRank);
+                hospitalSet.addAll(queryHospitalByRange(map));
             }
-            switch (level) {
-                case 1: { // 扩充区县级别到市
-                    for (Region region : regionList) {
-                        if (region.getType().equals(Constant.COUNTY)) {
-                            Region f = placeMapper.findRegionById(region.getFatherId());
-                            List<Region> sons = placeMapper.findRegionByFather(f.getId());
-                            for (Region s : sons) {
-                                String q = f.getName() + " " + s.getName();
-                                List<String> ids = hospitalPlace2Id.get(q);
-                                hospitalSet.addAll(queryHospitalByIds(ids));
-                            }
-                        }
-                    }
+            int level = 1;
+            System.out.println("结束经纬度题名医院:" + System.currentTimeMillis());
+            // 如果医院候选列表过少，将行政区划向上扩张
+            while (hospitalSet.size() < HOS_MIN_RECOMMAND_NUM) {
+                if (level > 2) {
+                    LOGGER.error("所提名的推荐医院候选列表元素个数太少,可能是数据原因。");
                     break;
                 }
-                case 2: { // 扩充市级别到省【或许没有必要】
-                    for (Region region : regionList) {
-                        if (region.getType().equals(Constant.CITY)) {
-                            Region f = placeMapper.findRegionById(region.getFatherId());
-                            List<Region> sons = placeMapper.findRegionByFather(f.getId());
-                            for (Region s : sons) {
-                                List<Region> gsons = placeMapper.findRegionByFather(s.getId());
-                                for (Region gs : gsons) {
-                                    String q = s.getName() + " " + gs.getName();
+                switch (level) {
+                    case 1: { // 扩充区县级别到市
+                        for (Region region : regionList) {
+                            if (region.getType().equals(Constant.COUNTY)) {
+                                Region f = placeMapper.findRegionById(region.getFatherId());
+                                List<Region> sons = placeMapper.findRegionByFather(f.getId());
+                                for (Region s : sons) {
+                                    String q = f.getName() + " " + s.getName();
                                     List<String> ids = hospitalPlace2Id.get(q);
                                     hospitalSet.addAll(queryHospitalByIds(ids));
                                 }
                             }
                         }
+                        break;
                     }
-                    break;
+                    case 2: { // 扩充市级别到省【或许没有必要】
+                        for (Region region : regionList) {
+                            if (region.getType().equals(Constant.CITY)) {
+                                Region f = placeMapper.findRegionById(region.getFatherId());
+                                List<Region> sons = placeMapper.findRegionByFather(f.getId());
+                                for (Region s : sons) {
+                                    List<Region> gsons = placeMapper.findRegionByFather(s.getId());
+                                    for (Region gs : gsons) {
+                                        String q = s.getName() + " " + gs.getName();
+                                        List<String> ids = hospitalPlace2Id.get(q);
+                                        hospitalSet.addAll(queryHospitalByIds(ids));
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
+                level++;
             }
-            level++;
+            System.out.println("结束扩充医院:" + System.currentTimeMillis());
         }
-        System.out.println("结束扩充医院:" + System.currentTimeMillis());
         hospitalList.addAll(hospitalSet);
         // 不知怎么的，set没法去重，手动再次去重
         Set<String> names = new HashSet<String>();
@@ -368,7 +370,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 hospital.setPlace(resultSet.getString("place"));
                 hospital.setQuality(resultSet.getString("quality"));
                 hospital.setUrl(resultSet.getString("url"));
-                // hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+                //hospital.setExpertList(queryExpertByHospital(hospital.getId()));
                 hospitals.add(hospital);
             }
             resultSet.close();
@@ -408,7 +410,7 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 hospital.setPlace(resultSet.getString("place"));
                 hospital.setQuality(resultSet.getString("quality"));
                 hospital.setUrl(resultSet.getString("url"));
-                hospital.setExpertList(queryExpertByHospital(hospital.getId()));
+                //hospital.setExpertList(queryExpertByHospital(hospital.getId()));
                 hospitals.add(hospital);
             }
             resultSet.close();

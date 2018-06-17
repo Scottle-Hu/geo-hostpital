@@ -47,12 +47,12 @@ public class APIController {
 
     @RequestMapping(value = "/main", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public void mainApi(@RequestParam("text") String text,
-                        @RequestParam(value = "lng", required = false) double lng,
-                        @RequestParam(value = "lat", required = false) double lat,
+                        @RequestParam(value = "lng", required = false) Double lng,
+                        @RequestParam(value = "lat", required = false) Double lat,
                         @RequestParam(value = "uid", required = false) String uid,    //用户唯一id，用于个性化推荐
                         HttpServletRequest request, HttpServletResponse response) {
         OutputStream out = null;
-        try {  //测试git
+        try {
             out = response.getOutputStream();
             request.setCharacterEncoding("utf-8");
             response.setHeader("Content-type", "text/html;charset=UTF-8");
@@ -66,7 +66,8 @@ public class APIController {
             } else {
                 long start = System.currentTimeMillis();
                 QueryRequest queryRequest =
-                        queryRequestFactory.createQuery(text, getIpAddress(request), new GeoPoint(lng, lat), uid);
+                        queryRequestFactory.createQuery(text, getIpAddress(request),
+                                lng == null || lat == null ? null : new GeoPoint(lng, lat), uid);
                 InformationResponse informationResponse = mainQueryService.handler(queryRequest);
                 long end = System.currentTimeMillis();
                 informationResponse.setResponseTime((end - start) / 1000 + "秒");

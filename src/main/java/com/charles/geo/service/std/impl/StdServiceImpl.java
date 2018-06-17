@@ -17,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -36,6 +37,8 @@ public class StdServiceImpl implements IStdService {
             "&ak=GpTMhCzysDnj632F3x14G8QbOBGyuMKr";
 
     private Map<String, List<String>> alias2Id = new HashMap<String, List<String>>();
+
+    private Map<String, String> cancerAlias = new HashMap<String, String>();
 
     @Autowired
     private DiseaseMapper diseaseMapper;
@@ -61,6 +64,22 @@ public class StdServiceImpl implements IStdService {
             alias2Id.get(a).add(alias.getRegionId());
         }
         System.out.println("========结束读取别名数据到内存中=======");
+        System.out.println("========开始读取脑肿瘤别名数据到内存中=======");
+        URL URL = StdServiceImpl.class.getClassLoader().getResource("brain_cancer.txt");
+        File file = new File(URL.getFile());
+        try {
+            BufferedReader bf = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), "utf-8"));
+            String line = null;
+            while ((line = bf.readLine()) != null) {
+                cancerAlias.put(line, "脑干肿瘤");
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("========结束读取脑肿瘤别名数据到内存中=======");
     }
 
     public List<GeoPoint> convertPOI2Point(String name) {
@@ -228,27 +247,6 @@ public class StdServiceImpl implements IStdService {
                 }
                 continue;
             }
-            //尝试查询t_place地点数据
-//            List<PointPlace> pointPlaces = placeMapper.queryPointPlaceByName(name);
-//            if (pointPlaces != null && pointPlaces.size() > 0) {
-//                for (PointPlace place : pointPlaces) {
-//                    GeoPoint p = new GeoPoint();
-//                    p.setLatitude(Double.parseDouble(place.getLatitude()));
-//                    p.setLongitude(Double.parseDouble(place.getLongitude()));
-//                    pointList.add(p);
-//                }
-//                continue;
-//            }
-//            pointPlaces = placeMapper.queryPointPlaceByName(name + "%");
-//            if (pointPlaces != null && pointPlaces.size() > 0) {
-//                for (PointPlace place : pointPlaces) {
-//                    GeoPoint p = new GeoPoint();
-//                    p.setLatitude(Double.parseDouble(place.getLatitude()));
-//                    p.setLongitude(Double.parseDouble(place.getLongitude()));
-//                    pointList.add(p);
-//                }
-//                continue;
-//            }
             //尝试调用api
             getGeoPointByAPI(name, regionList, pointList);
         }
@@ -340,6 +338,9 @@ public class StdServiceImpl implements IStdService {
     public List<Disease> stdDisease(List<String> diseaseNames) {
         List<Disease> diseaseList = new ArrayList<Disease>();
         for (String disease : diseaseNames) {
+            if (cancerAlias.get(disease) != null) {  //脑部肿瘤细化的类别映射
+                disease = cancerAlias.get(disease);
+            }
             //先尝试按照标准名称获取疾病
             List<Disease> diseases = diseaseMapper.findByName(disease);
             if (diseases == null || diseases.size() == 0) {
