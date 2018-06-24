@@ -15,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -367,8 +368,15 @@ public class StdServiceImpl implements IStdService {
      * @return
      */
     public List<GeoPoint> convertPeople2Hospital(String name) {
+        System.out.println("根据专家" + name + "，开始查询相关医院:");
         List<GeoPoint> points = new ArrayList<GeoPoint>();
         List<Hospital> hospitals = hospitalMapper.queryByExpert(name);
+        if (CollectionUtils.isEmpty(hospitals)) {
+            System.out.println("没有查询到任何医院！");
+        }
+        for (Hospital h : hospitals) {
+            System.out.println(h.getName());
+        }
         for (Hospital h : hospitals) {
             double lng = h.getLongitude();
             double lat = h.getLatitude();

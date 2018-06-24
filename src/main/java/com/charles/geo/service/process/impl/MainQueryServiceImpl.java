@@ -254,12 +254,20 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 names.add(n);
             }
         }
+        System.out.println("提名出的医院：");
+        for (Hospital h : hospitalList) {
+            System.out.println(h.getName());
+        }
         // 根据疾病名称排序筛选
         hospitalList = rankService.rankHospital(hospitalList, request);
         if (hospitalList.size() > HOS_MAX_RECOMMAND_NUM) { // 多于最多推荐个数，筛选前N个
             hospitalList = hospitalList.subList(0, HOS_MAX_RECOMMAND_NUM);
         }
         System.out.println("结束筛选医院:" + System.currentTimeMillis());
+        System.out.println("筛选排序后的医院：");
+        for (Hospital h : hospitalList) {
+            System.out.println(h.getName());
+        }
         return hospitalList;
     }
 
@@ -332,12 +340,20 @@ public class MainQueryServiceImpl implements IMainQueryService {
                 names.add(n);
             }
         }
+        System.out.println("提名的大学:");
+        for (Colleage c : colleageList) {
+            System.out.println(c.getName());
+        }
         // 排序筛选
         colleageList = rankService.rankColleage(colleageList, request);
         if (colleageList.size() > COLLE_MAX_RECOMMAND_NUM) {
             colleageList = colleageList.subList(0, COLLE_MAX_RECOMMAND_NUM);
         }
         System.out.println("结束筛选大学:" + System.currentTimeMillis());
+        System.out.println("筛选排序后的大学:");
+        for (Colleage c : colleageList) {
+            System.out.println(c.getName());
+        }
         return colleageList;
     }
 

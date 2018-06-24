@@ -45,6 +45,7 @@ public class QueryRequestFactory implements IQueryRequestFactory {
      */
     public QueryRequest createQuery(String text, String ip, GeoPoint curPoint, String uid) {
         String regionFromIP = iip2regionService.getCityFromIP(ip);
+        System.out.println("根据ip获取的地点：" + regionFromIP);
         if (!StringUtils.isEmpty(regionFromIP))
             text = text + "," + regionFromIP;
         QueryRequest request = new QueryRequest();
@@ -55,6 +56,15 @@ public class QueryRequestFactory implements IQueryRequestFactory {
         nerService.nerFromText(text, pointList, regionList, diseaseList);
         //做地点数据预处理
         placeDataCleanService.clean(pointList, regionList);
+        System.out.println("对地点数据预处理之后：");
+        System.out.println("行政区划：");
+        for (Region r : regionList) {
+            System.out.println(r.getName());
+        }
+        System.out.println("经纬度点：");
+        for (GeoPoint r : pointList) {
+            System.out.println("(" + r.getLongitude() + "," + r.getLatitude() + ")");
+        }
         //封装推荐请求信息
         request.setDiseaseList(diseaseList);
         if (curPoint != null)
