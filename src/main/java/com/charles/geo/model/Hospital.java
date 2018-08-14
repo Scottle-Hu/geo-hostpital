@@ -41,6 +41,8 @@ public class Hospital {
      */
     private List<Expert> expertList;
 
+    private int score;
+
     public String getId() {
         return id;
     }
@@ -143,6 +145,14 @@ public class Hospital {
 
     public void setExpertList(List<Expert> expertList) {
         this.expertList = expertList;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override

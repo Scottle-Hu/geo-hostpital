@@ -33,4 +33,11 @@ public interface DiseaseMapper {
      * @return
      */
     List<String> findDiseaseNameByDrug(String drug);
+
+    /**
+     * 获取所有疾病名称
+     *
+     * @return
+     */
+    List<String> getAllName();
 }

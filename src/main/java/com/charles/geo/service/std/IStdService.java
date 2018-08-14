@@ -18,7 +18,7 @@ public interface IStdService {
      * @param place
      * @return
      */
-    GeoPoint convertPOI2Point(String place);
+    List<GeoPoint> convertPOI2Point(String place);
 
     /**
      * 将药物名称转化为疾病对象集合

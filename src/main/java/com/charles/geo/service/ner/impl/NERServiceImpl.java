@@ -54,9 +54,40 @@ public class NERServiceImpl implements INERService {
         List<String> peopleNames = new ArrayList<String>();
         List<String> diseaseNames = new ArrayList<String>();
         nerString(text, regionNames, placeNames, peopleNames, diseaseNames);
+        System.out.println("命名实体识别结果：");
+        System.out.println("行政区划实体：");
+        for (String s : regionNames) {
+            System.out.println(s);
+        }
+        System.out.println("地点实体：");
+        for (String s : placeNames) {
+            System.out.println(s);
+        }
+        System.out.println("人名实体：");
+        for (String s : peopleNames) {
+            System.out.println(s);
+        }
+        System.out.println("疾病实体：");
+        for (String s : diseaseNames) {
+            System.out.println(s);
+        }
+
         //调用标准化模块将字符串转化为对象
         stdService.convert2StdName(regionNames, placeNames, regionList, geoPoints);
+        System.out.println("标准化结果：");
+        System.out.println("标准化行政区划名称：");
+        for (Region r : regionList) {
+            System.out.println(r.getName());
+        }
+        System.out.println("标准化经纬度点：");
+        for (GeoPoint r : geoPoints) {
+            System.out.println("(" + r.getLongitude() + "," + r.getLatitude() + ")");
+        }
+        System.out.println("标准化疾病名称：");
         diseaseList.addAll(stdService.stdDisease(diseaseNames));
+        for (Disease d : diseaseList) {
+            System.out.println(d.getName());
+        }
     }
 
     //从文本中识别出对应的字符串数组

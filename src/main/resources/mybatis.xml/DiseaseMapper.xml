@@ -32,4 +32,9 @@
       SELECT disease FROM t_drug WHERE drug LIKE #{_param}
     </select>
 
+    <!--找到所有疾病名称-->
+    <select id="getAllName" resultMap="StringMap">
+        select distinct(`disease`) from t_disease
+    </select>
+
 </mapper>

@@ -53,14 +53,13 @@ public class MainQueryServiceImplTest {
     @Test
     public void testMain() {
         List<String> regionNames = new ArrayList<String>();
-        regionNames.add("武昌");
-        regionNames.add("湖北");
-        regionNames.add("北京市");
+        regionNames.add("浦东");
+        regionNames.add("上海市");
+        regionNames.add("上海");
         List<String> pointNames = new ArrayList<String>();
-        pointNames.add("武汉大学");
-        pointNames.add("九省通衢");
-        pointNames.add("华科");
-        pointNames.add("中南医院");
+        pointNames.add("复旦大学");
+        pointNames.add("东方之珠");
+        pointNames.add("上海协和医院");
         List<Region> regionList = new ArrayList<Region>();
         List<GeoPoint> pointList = new ArrayList<GeoPoint>();
         long start = System.currentTimeMillis();

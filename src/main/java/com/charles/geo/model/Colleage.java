@@ -26,6 +26,8 @@ public class Colleage {
      */
     private Map<String, List<Paper>> paperList;
 
+    private int score;
+
     public String getId() {
         return id;
     }
@@ -72,6 +74,14 @@ public class Colleage {
 
     public void setPaperList(Map<String, List<Paper>> paperList) {
         this.paperList = paperList;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override

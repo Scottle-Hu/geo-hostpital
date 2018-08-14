@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charles.geo.mapper.PaperMapper">
+
+    <!-- 定义Paper类型 -->
+    <resultMap type="Paper" id="PaperMap">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="author" column="author"/>
+        <result property="dnum" column="dnum"/>
+        <result property="source" column="source"/>
+        <result property="reference" column="reference"/>
+        <result property="url" column="url"/>
+    </resultMap>
+
+    <resultMap id="StringMap" type="String">
+        <result column="paper_id" property="id"/>
+    </resultMap>
+
+    <!--插入一条论文记录-->
+    <insert id="insertOne" parameterType="Paper">
+        INSERT INTO t_paper VALUES
+        (#{id},#{title},#{publishTime},#{author},#{dnum},#{source},#{reference},#{url})
+    </insert>
+
+    <!--根据id查询论文-->
+    <select id="findByPaperId" parameterType="String" resultType="Paper">
+        SELECT * FROM t_paper WHERE id=#{_param}
+    </select>
+
+    <!--根据学校和疾病查询论文id列表-->
+    <select id="findPaperId" resultMap="StringMap" parameterType="Map">
+        SELECT paper_id FROM t_university_disease_paper
+        WHERE university=#{university} AND disease=#{disease}
+    </select>
+
+    <!--根据论文的标题和作者判断论文是否已经存在，避免重复存储-->
+    <select id="findByNameAndAuthor" parameterType="Map" resultMap="PaperMap">
+        SELECT * FROM t_paper WHERE title=#{title} AND author=#{author}
+    </select>
+
+    <!--存储学校、疾病和论文id的对应关系-->
+    <insert id="insertUniversityAndDiseaseWithPaper" parameterType="Map">
+        INSERT INTO t_university_disease_paper (id,university,disease,paper_id)
+        VALUES (#{id},#{university},#{disease},#{paper_id})
+    </insert>
+
+</mapper>

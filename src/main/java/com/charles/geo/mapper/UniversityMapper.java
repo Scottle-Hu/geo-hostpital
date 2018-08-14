@@ -37,4 +37,11 @@ public interface UniversityMapper {
      * 根据简称查询
      */
     List<Colleage> queryByAliases(String alias);
+
+    /**
+     * 获取所有大学名称，用于抓取论文
+     *
+     * @return
+     */
+    List<Colleage> getAllName();
 }

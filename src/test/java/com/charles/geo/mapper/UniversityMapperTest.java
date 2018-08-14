@@ -55,4 +55,14 @@ public class UniversityMapperTest {
         }
     }
 
+    @Test
+
+    public void test04() {
+        List<Colleage> allName = universityMapper.getAllName();
+        for (Colleage name : allName) {
+            System.out.println(name.getName());
+        }
+        System.out.println(allName.size());
+    }
+
 }

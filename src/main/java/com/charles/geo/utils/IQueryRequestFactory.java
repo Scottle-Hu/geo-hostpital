@@ -9,5 +9,5 @@ import com.charles.geo.model.QueryRequest;
  */
 public interface IQueryRequestFactory {
 
-    QueryRequest createQuery(String text, String ip, GeoPoint curPoint);
+    QueryRequest createQuery(String text, String ip, GeoPoint curPoint, String uid);
 }
